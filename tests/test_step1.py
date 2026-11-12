@@ -142,10 +142,12 @@ class TestPreflight(RunnerCase):
                               {"t01": "a", "t02": "b"}, strict=True)
         original = WorktreeManager.commit
 
-        def commit(manager, wt, message):
+        def commit(manager, wt, message, files=None):
+            # files 是 v1.9.5 加的：验收过了要重新提交一次，
+            # 只加 worker 改过的文件，免得把验收产生的缓存一起带进去。
             if wt.task_id == "t01":
                 raise GitError("injected failure")
-            return original(manager, wt, message)
+            return original(manager, wt, message, files=files)
 
         with mock.patch.object(WorktreeManager, "commit", new=commit):
             summary = run_plan(self.run_dir, router, FakeJudge())

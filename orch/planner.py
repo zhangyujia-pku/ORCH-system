@@ -34,6 +34,10 @@ from .contract import (
 from .prompts import build_prompt
 from .trace import Tracer
 
+# prompt 超过这个长度就不再塞进 argv，改走 stdin。取 7000 是留足余量：
+# cmd.exe 的整条命令上限是 8191 字符，而 codex 常被 .cmd 包装脚本间接启动。
+_PROMPT_ARGV_LIMIT = 7000
+
 
 class PlanParseError(ValueError):
     """模型输出里找不到合法 JSON。"""
@@ -281,7 +285,14 @@ class CLIProvider(Provider):
         out_file = tmpdir / "last_message.txt"
         prompt_file.write_text(prompt, encoding="utf-8")
 
+        # Windows 的命令行有硬上限（cmd.exe 8191、CreateProcess 32767），而 planning 的提示词
+        # 动辄两三万字符（规则 + 需求 + 文件清单）。超限时两条路都是坏的：
+        #   * 走 .exe：CreateProcess 直接失败（WinError 206）；
+        #   * 走 .cmd 包装：被 cmd.exe 截断，codex 收到空 prompt，转而读 stdin（DEVNULL=EOF），退出 1。
+        # 所以长的 prompt 一律改走 stdin（`codex exec -`），argv 里只留一个 "-"。
+        big_prompt = len(prompt) > _PROMPT_ARGV_LIMIT and "{prompt}" in self.argv
         argv = [
+            "-" if (big_prompt and a == "{prompt}") else
             a.replace("{prompt_file}", str(prompt_file))
             .replace("{out_file}", str(out_file))
             .replace("{prompt}", prompt)
@@ -295,15 +306,30 @@ class CLIProvider(Provider):
 
             p = subprocess.Popen(
                 argv, cwd=str(cwd),
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE if big_prompt else subprocess.DEVNULL,
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
                 start_new_session=os.name != "nt",
             )
-        except FileNotFoundError as e:
+        except OSError as e:
             prompt_file.unlink(missing_ok=True)
+            if getattr(e, "winerror", None) == 206:
+                raise ProviderError(
+                    f"命令行太长（prompt {len(prompt):,} 字符），Windows 拒绝启动进程。"
+                    f"这条本应改走 stdin；请把这句话连同 orch 版本一起报告。") from e
             raise ProviderError(
                 f"找不到可执行文件：{argv[0]}。确认它在 PATH 上，或用绝对路径 / 设 CODEX_BIN。"
             ) from e
+        if big_prompt:
+            # 立刻写完并关掉：control.wait_process 用 communicate() 收尾，stdin 留着会互相等
+            try:
+                p.stdin.write(prompt.encode("utf-8"))
+                p.stdin.flush()
+                p.stdin.close()
+            except (BrokenPipeError, OSError):
+                pass
+            finally:
+                p.stdin = None
 
         try:
             stdout_b, stderr_b = control.wait_process(p, timeout) if control else p.communicate(timeout=timeout)
@@ -321,7 +347,18 @@ class CLIProvider(Provider):
         stdout, stderr = decode_bytes(stdout_b), decode_bytes(stderr_b)
         self.last_tokens = self.parse_tokens((stdout or "") + "\n" + (stderr or ""))
         if p.returncode != 0:
-            raise ProviderError(f"{argv[0]} 调用失败（退出码 {p.returncode}）：{stderr[-400:]}")
+            err = (stderr or "").strip()
+            out = (stdout or "").strip()
+            # 这条提示只在"没拿到 prompt、去读 stdin"时出现。出现即说明 prompt 没送达，
+            # 是命令行传参的问题，不是模型的问题——必须说清楚，否则会被当成模型挂了。
+            hint = ""
+            if "Reading additional input from stdin" in err and not big_prompt:
+                hint = ("\n  提示：codex 没有收到 prompt 参数，正在读 stdin。"
+                        f"本次 prompt {len(prompt):,} 字符，接近或超过 Windows 命令行上限。")
+            raise ProviderError(
+                f"{argv[0]} 调用失败（退出码 {p.returncode}）：{err[-400:]}"
+                + (f"\n  stdout 尾部：{out[-300:]}" if out else "")
+                + hint)
 
         # --json 时 stdout 是事件流，不是人话。先解析；解析不出再退回原始文本，
         # 宁可多留一坨日志，也不能把 worker 的结论丢掉。

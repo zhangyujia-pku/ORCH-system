@@ -76,6 +76,12 @@ SYSTEM_RULES = """你是任务规划器。输入是一段自然语言需求，�
    如果确实只改一个文件，就写那一个文件名。
 10. **判据里的命令要能直接跑**：用 `python -m pytest`，不要写裸 `pytest`
    （很多机器 PATH 上没有 pytest.exe）。同理用 `python -m ruff`。
+   两条硬约束，写错就是 `launch_error`、整条判据直接失败：
+   - **按 argv 直接执行，不经过 shell**：不要用管道 `|`、重定向 `>`、`&&`、`$(...)`。
+     要过滤就让工具自己带参数（`git diff --name-only`、`git diff --stat`、`grep -c`、`wc -l`）。
+   - **不要写只在 Windows 交互式命令行里才有的命令**（`Get-Content` / `Select-String` /
+     `Test-Path` / `Measure-Object`）：它们在 sh 环境里根本不存在。用 `cat` / `grep` /
+     `test -e` / `wc -l`。跨平台写法是 `python -c "..."`。
 11. **读写依赖必须显式写出来**：如果任务 B 的 `reads` 里包含任务 A 的 `writes` 里的文件，
    B 的 `deps` 必须包含 A。否则 B 会读到旧版本。
 12. **判据不许依赖"修改前"**。"等于修改前的公开函数集合"这种写法，执行者看不到修改前是什么，

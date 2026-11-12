@@ -68,6 +68,34 @@ def check_import() -> tuple[str, str, str]:
     return OK, "orch 导入", str(ROOT)
 
 
+def check_codex_exec() -> tuple[str, str, str]:
+    """这个 codex 版本的 `exec` 认不认 workers.json 里用的那些参数。
+
+    只验版本号是不够的：0.167 换成别的版本后，`--json` / `--skip-git-repo-check` /
+    `--sandbox` / `-C` 任意一个被改名或移除，orch 都会在**真正派发时**才失败，
+    而失败信息（“退出码 1”）看起来像模型挂了。这条检查不花钱，能在派发前拦住。
+    """
+    sys.path.insert(0, str(ROOT))
+    try:
+        from orch.planner import resolve_codex
+
+        exe = resolve_codex()
+    except Exception as e:                  # noqa: BLE001
+        return WARN, "codex exec 参数", f"拿不到 codex 路径：{e}"
+    if not exe or not Path(exe).exists():
+        return WARN, "codex exec 参数", "拿不到 codex 路径，跳过"
+    code, out = _run([exe, "exec", "--help"])
+    if code != 0:
+        return FAIL, "codex exec 参数", f"`exec --help` 退出码 {code}：{out[-120:]}"
+    need = ["--json", "--skip-git-repo-check", "--sandbox", "--cd", "-c", "-m"]
+    missing = [f for f in need if f not in out]
+    if missing:
+        return FAIL, "codex exec 参数", (
+            f"缺 {', '.join(missing)}——这个版本与 workers.json 的模板不兼容；"
+            f"先 `codex --version` 记下版本，再决定是换版本还是改模板")
+    return OK, "codex exec 参数", "json / skip-git-repo-check / sandbox / cd 都在"
+
+
 def check_codex() -> tuple[str, str, str]:
     sys.path.insert(0, str(ROOT))
     try:
@@ -132,7 +160,7 @@ def check_defaults() -> tuple[str, str, str]:
     return OK, "worker 注册表", f"{len(ws)} 档 · ladder={ladder} · 默认 {first}"
 
 
-CHECKS = (check_python, check_git, check_import, check_codex,
+CHECKS = (check_python, check_git, check_import, check_codex, check_codex_exec,
           check_sandbox, check_env, check_defaults)
 
 

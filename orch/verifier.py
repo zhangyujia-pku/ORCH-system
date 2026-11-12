@@ -113,6 +113,14 @@ def parse_output_criterion(criterion: str) -> tuple[str, str, str] | None:
         return None
     cmd = m.group(1).strip()
     only, verb, expected = m.group(2), m.group(3), m.group(4).strip()
+    # 判据常写成「输出等于 `README.md` 且退出码 0」。末尾锚点让正则贪婪吃到结尾，
+    # 期望值会变成「README.md` 且」，永远比不上。第一个反引号就是期望值的右边界。
+    if "`" in expected:
+        # 期望值通常被一对反引号包住；取第一个非空片段，就能同时处理
+        # 「`X`」和「`X` 且退出码 0」两种写法。
+        parts = [x for x in expected.split("`") if x.strip()]
+        if parts:
+            expected = parts[0]
     expected = re.sub(r"[，；,;]?\s*(?:退出码|返回码)\s*-?\d+\s*[。.]?\s*$", "", expected).rstrip()
     expected = expected.strip("`\"'「」“” ")
     mode = "only" if only else ("exact" if verb in ("为", "等于", "是") else "contains")
@@ -123,8 +131,19 @@ def _norm(s: str) -> str:
     return " ".join(s.split())
 
 
+def _unescape_output(s: str) -> str:
+    """planner 习惯用 JSON 风格转义描述命令输出：`git diff --numstat` 会写成
+    `1\t1\tfile`。字面比较永远不等（真输出是制表符），而判据看着完全合理——
+    这类假失败最难归因，所以在比较前统一还原一次。
+    """
+    if "\\" not in s:
+        return s
+    return s.replace("\\t", "\t").replace("\\r", "\r").replace("\\n", "\n")
+
+
 def run_output_command(cmd: str, expected: str, mode: str, cwd: Path,
                        timeout: int = 300, expected_exit: int = 0, control=None) -> Check:
+    expected = _unescape_output(expected)
     chk = run_command(cmd, cwd, timeout=timeout, expected_exit=expected_exit, control=control)
     if not chk.ok:
         chk.kind = "command-output"

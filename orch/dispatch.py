@@ -404,6 +404,7 @@ def dispatch(
     budget: float = 6.0,
     detach: bool = True,
     notify: bool = True,
+    force_notify: bool = False,          # 显式 --notify：前台也投递
     plan_only: bool = False,
     provider: str = "codex",
     verifier: str = "codex",
@@ -516,6 +517,11 @@ def dispatch(
                         note=eta_note), 0
 
     if mode == "foreground":
+        # 前台是同步的：报告就是这条命令的返回值，调用方（Codex）这一轮直接读得到。
+        # 再投一次等于把同一份报告推回会话、多唤起一轮，还要先花最多 45 秒猜窗口。
+        # 只有明确要求（--notify）才投。
+        if not force_notify:
+            notify = False
         meta.update({"state": "running", "mode": "foreground",
                      "detached": False, "updated_at": _now()})
         (run_dir / "dispatch.json").write_text(
@@ -781,7 +787,7 @@ def _run_job(
                        state="failed", stage="execution" if started else "preflight",
                        execution_started=started, reason=str(e))
 
-    msg = _render_done(run_id, text, plan_res, summary, run_dir)
+    msg = _render_done(run_id, text, plan_res, summary, run_dir, _auto_apply(run_dir, summary))
     return _finish(run_dir, match, notify, log, msg, 0 if summary.ok else 4,
                    state=summary.state, stage="execution" if summary.execution_started else "preflight",
                    execution_started=summary.execution_started, reason=summary.reason,
@@ -809,7 +815,9 @@ def _finish(run_dir: Path, match, notify: bool, log: _Log, message: str, code: i
     _patch_meta(run_dir, result)
     Tracer(run_dir / "trace.jsonl", operation_id=meta.get("operation_id")).emit("operation.end", **result)
 
-    sent, detail = (False, "跳过（--no-notify 或未定位到窗口）")
+    # 三种"没投递"要说清是哪一种：前台同步是正常的，投递失败才需要人管。
+    sent, detail = (False, "前台同步返回：报告已在命令输出里，无需投递") if not notify \
+        else (False, "跳过（未定位到当前窗口）")
     if meta.get("delivery_reused"):
         sent, detail, notify = True, "复用上次成功送达记录，未重复发送", False
     attempted = bool(notify and match and match.thread_id)
@@ -889,7 +897,42 @@ def _cost_block(plan_res, summary, run_dir: Path) -> str:
                           enabled=control_arm.enabled())
 
 
-def _render_done(run_id, text, plan_res, summary, run_dir: Path) -> str:
+def auto_apply_enabled() -> bool:
+    v = (os.environ.get("ORCH_AUTO_APPLY") or "").strip().lower()
+    return v not in {"off", "0", "false", "no"}
+
+
+def _auto_apply(run_dir: Path, summary) -> str:
+    """成功后自动把产物落到用户当前分支，返回一句给人看的说明。
+
+    为什么要自动：不自动的话，用户体验是"跑完了但文件没变"，然后只有两条路——
+    让模型自己手抄（没有冲突检测、没有记录），或者让用户回终端敲 apply。
+    后者与"用户不碰终端"直接矛盾，前者是我们要堵的灰色动作。
+
+    `apply_run` 本身已经把防护做全了：state 必须是 done、整合分支必须存在、
+    不能在游离 HEAD 上合、工作区有未提交改动就不合、冲突自动 abort 并回滚。
+    这里只负责把结果说清楚，不做任何"尽力尝试"。
+    """
+    if not summary.ok or not summary.merged_branch:
+        return ""
+    if not auto_apply_enabled():
+        return ("自动合并已关闭（ORCH_AUTO_APPLY=off）：产物在集成分支，"
+                "需要时执行 `orch apply`。")
+    try:
+        from .apply import apply_run
+
+        res = apply_run(run_dir)
+    except Exception as e:                       # noqa: BLE001
+        return (f"自动合并出错：{type(e).__name__}: {e}。"
+                f"产物在集成分支，可稍后 `orch apply` 重试。")
+    if res.errors:
+        return f"自动合并未执行：{res.errors[0]}（产物在集成分支，处理后可 `orch apply`）"
+    if res.merged:
+        return f"已自动合并到当前分支（{len(res.files)} 个文件）。要撤回：`orch undo {res.run_id}`。"
+    return "自动合并未产生变化（当前分支已包含这些改动）。"
+
+
+def _render_done(run_id, text, plan_res, summary, run_dir: Path, apply_note: str = "") -> str:
     title = "执行成功" if summary.ok else {"blocked": "执行被阻断", "waiting_input": "等待用户回答",
                                             "cancelled": "已取消", "resource_limit": "资源上限已到",
                                             "recovery_required": "需要人工检查"}.get(summary.state, "执行失败")
@@ -968,7 +1011,9 @@ def _render_done(run_id, text, plan_res, summary, run_dir: Path) -> str:
             lines.append(f"  {w}")
     if summary.merged_branch:
         lines.append("")
-        lines.append(f"合并：{summary.merged_branch}")
+        lines.append(f"整合分支：{summary.merged_branch}")
+        if apply_note:
+            lines.append(f"工作区：{apply_note}")
     try:
         block = _cost_block(plan_res, summary, run_dir)
     except Exception as e:                       # 核算失败不能拖垮交付
@@ -1019,6 +1064,11 @@ def _render_plan_failed(run_id, text, plan_res, run_dir: Path) -> str:
             lines.append(f"  FAIL attempt {a.n}  {a.parse_error}")
         else:
             lines.append(f"  FAIL attempt {a.n}  {', '.join(a.codes)}")
+    lines.append("")
+    lines.append("## 成本核算")
+    lines.append(f"  本次 D          未执行（规划阶段就停了），worker 用量未采集")
+    lines.append("  A 对照         未运行（规划失败不启动对照组，不重复花钱）")
+    lines.append("  节省            无法给出——没有可比的两侧用量，任何百分比都是编的")
     lines.append("")
     lines.append(f"详情：{run_dir / 'plan.failed.json'}")
     lines.append("")
@@ -1126,7 +1176,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="外部计划 JSON：由调用方（如 Codex）直接给出，跳过 Planner；"
                          "校验不过时交便宜模型修补")
     ap.add_argument("--plan-only", action="store_true", help="只编译计划，不执行")
+    ap.add_argument("--notify", action="store_true",
+                    help="前台也把报告投回会话（默认只在后台模式投；前台报告已在输出里）")
     ap.add_argument("--no-notify", action="store_true", help="不往窗口回传")
+    ap.add_argument("--no-apply", action="store_true",
+                    help="成功后不自动合并到当前分支（产物留在集成分支）")
     ap.add_argument("--mode", default="auto",
                     choices=["auto", "serve", "foreground", "detach"],
                     help="auto=有常驻宿主就入队、没有就当场跑；serve=只入队；"
@@ -1162,6 +1216,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.serve:
         return serve(poll=args.poll, once=args.once, runs_dir=args.runs_dir)
 
+    # 自动合并的开关走环境变量：--job 是另一个进程、serve 还要跨进程投递，
+    # 只有环境变量在这几条路径上都成立。
+    if args.no_apply:
+        os.environ["ORCH_AUTO_APPLY"] = "off"
+
     if args.job:
         pids = [int(x) for x in args.pids.split(",") if x.strip()] if args.pids else None
         return run_job(
@@ -1183,11 +1242,12 @@ def main(argv: list[str] | None = None) -> int:
 
     mode = "foreground" if args.foreground else args.mode
     runs_dir = args.runs_dir or str(Path(args.repo).resolve() / ".orch-runs")
+    notify = not args.no_notify
     d, code = dispatch(
         args.text, repo=args.repo, runs_dir=runs_dir,
         thread_id=args.thread, nonce=args.nonce,
         max_agents=args.max_agents, budget=args.budget,
-        detach=(mode != "foreground"), notify=not args.no_notify,
+        detach=(mode != "foreground"), notify=notify, force_notify=args.notify,
         plan_only=args.plan_only, provider=args.provider,
         verifier=args.verifier, timeout=args.timeout, mode=mode,
         verification_path=args.verification,

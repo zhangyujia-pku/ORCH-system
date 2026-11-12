@@ -127,12 +127,28 @@ def run(repo: Path, goal: str, timeout: int = 900) -> dict:
     t0 = time.time()
     try:
         try:
+            # repo 可能只是仓库里的一个子目录（demo/fixture 这种）。
+            # 直接 git clone 子目录会报 "does not appear to be a git repository"，
+            # 所以先问 git 真正的根在哪，clone 整棵树，再把 A 放到对应子目录里跑。
+            root, rel = repo, Path(".")
+            probe = subprocess.run(["git", "-C", str(repo), "rev-parse", "--show-toplevel"],
+                                   capture_output=True, text=True, encoding="utf-8",
+                                   errors="replace", timeout=30)
+            if probe.returncode == 0 and probe.stdout.strip():
+                root = Path(probe.stdout.strip())
+                try:
+                    rel = repo.relative_to(root)
+                except ValueError:
+                    root, rel = repo, Path(".")
             r = subprocess.run(["git", "clone", "--quiet", "--no-hardlinks",
-                                str(repo), str(work)],
+                                str(root), str(work)],
                                capture_output=True, text=True,
                                encoding="utf-8", errors="replace", timeout=120)
             if r.returncode != 0 or not work.is_dir():
                 raise RuntimeError((r.stderr or "clone 失败")[-200:])
+            cwd = work / rel
+            if not cwd.is_dir():
+                raise RuntimeError(f"克隆出来的仓库里没有 {rel}")
         except Exception as e:
             return {"usage": {}, "wall_s": 0.0, "exit_code": -1,
                     "note": f"对照组未能启动：{type(e).__name__}: {e}"}
@@ -150,7 +166,7 @@ def run(repo: Path, goal: str, timeout: int = 900) -> dict:
 
         p = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                             errors="replace", cwd=str(work), env=env)
+                             errors="replace", cwd=str(cwd), env=env)
         box: dict = {}
 
         def _communicate() -> None:

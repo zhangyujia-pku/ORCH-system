@@ -19,7 +19,20 @@ def atomic_json(path: Path, data: dict) -> None:
         json.dump(data, handle, ensure_ascii=False, indent=2)
         handle.flush()
         os.fsync(handle.fileno())
-    temp.replace(path)
+    # Windows 上 os.replace 会在目标被另一只手短暂占用时抛 WinError 5（杀软扫描、
+    # 上一次写入的句柄还没释放、同步盘在对比）。这份文件是**运行状态**，不是账本：
+    # 宁可退化成非原子写，也不要因为一次改名失败把整次运行判死。
+    for attempt in range(6):
+        try:
+            temp.replace(path)
+            return
+        except PermissionError:
+            if attempt == 5:
+                break
+            time.sleep(0.02 * (attempt + 1))
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(data, handle, ensure_ascii=False, indent=2)
+    temp.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)

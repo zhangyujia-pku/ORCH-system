@@ -35,6 +35,24 @@ from .control import ControlledProvider, RunControl, RunLock, RunStopped, load_e
 from .recovery import Recovery, find_answer, manifest_digest
 
 
+def _file_state(root: Path, files: list[str]) -> dict[str, str]:
+    """产物文件的内容指纹。
+
+    验收命令本身是"被判者"，它不许改产物——改了就等于自己给自己出题。
+    这一层比 assert_snapshot 更细：后者看提交点，前者看具体文件内容。
+    """
+    import hashlib
+
+    out: dict[str, str] = {}
+    for f in files or []:
+        p = Path(root) / f
+        try:
+            out[f] = hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else "<absent>"
+        except OSError:
+            out[f] = "<unreadable>"
+    return out
+
+
 def _diff_stat(diff: str) -> str:
     """从 unified diff 里数增删行，只用于报告展示。"""
     add = sum(1 for ln in diff.splitlines()
@@ -677,21 +695,54 @@ def _run_one(
     tracer.emit(commit_event, task_id=task.id, changed=res.changed, sha=commit.sha,
                 base=wt.base, created_by_engine=commit.created)
 
+    # 提交完立刻退回未暂存状态，再验收。
+    # 原因：判据大量是 `git diff --name-only` / `git diff --unified=0`，它们比的是**工作区**；
+    # 提交之后工作区是干净的，这些判据一律输出空，表现为"worker 改对了、验收 0/3 通过"。
+    # 真跑 README.md 那次就是这么假失败的。验收过了再重新提交一次（只加 worker 改过的文件，
+    # 免得把验收命令产生的缓存一并带进去）。
+    before_state = _file_state(wt.path, res.changed)
+    if commit.created:
+        try:
+            manager.uncommit(wt, wt.base)
+        except GitError as e:
+            tracer.emit("task.uncommit_failed", task_id=task.id, reason=str(e))
+
     verdict = verify_task(
         task, wt, diff, verifier_provider, timeout=timeout,
         files_context=collect_file_context(wt.path, res.changed), control=control,
     )
-    try:
-        manager.assert_snapshot(wt.path, commit.sha)
-    except GitError as e:
+    after_state = _file_state(wt.path, res.changed)
+    if after_state != before_state:
+        # 验收命令把产物改了：不能凭"它自己改完再判自己"过。
         verdict.ok = False
-        verdict.checks.append(Check("验收期间版本保持不变", "integrity", False, str(e), status="mutation"))
+        changed_now = sorted(k for k in after_state if before_state.get(k) != after_state.get(k))
+        verdict.checks.append(Check("验收期间产物未被改动", "integrity", False,
+                                    f"这些文件在验收过程中变了：{', '.join(changed_now) or '（新增/删除）'}",
+                                    status="mutation"))
     (artifacts / f"{task.id}-a{attempt}.verify.json").write_text(
         __import__("json").dumps(
             [asdict(c) for c in verdict.checks],
             ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+    head_sha = wt.base
+    if verdict.ok:
+        try:
+            commit = manager.commit(wt, f"orch: {task.id} {task.goal}", files=res.changed)
+        except GitError as e:
+            tracer.emit("task.commit_failed", task_id=task.id, reason=str(e))
+            verdict.ok = False
+            verdict.checks.append(Check("产物可以提交", "commit", False, str(e)))
+        else:
+            head_sha = commit.sha
+            try:
+                manager.assert_snapshot(wt.path, commit.sha)
+            except GitError as e:
+                verdict.ok = False
+                verdict.checks.append(Check("验收期间版本保持不变", "integrity", False, str(e),
+                                            status="mutation"))
+
     tracer.emit("task.verify", task_id=task.id, ok=verdict.ok,
                 failed=[c.criterion for c in verdict.failures],
                 statuses=[c.status for c in verdict.checks])
@@ -706,7 +757,7 @@ def _run_one(
         elapsed_s=time.time() - t0,
         note="" if verdict.ok else "验收未通过",
         base_sha=wt.base,
-        head_sha=commit.sha,
+        head_sha=head_sha,
         retryable=not verdict.ok and all(c.status in {"passed", "failed"} for c in verdict.checks),
         checks=[{
             "criterion": c.criterion,

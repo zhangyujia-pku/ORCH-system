@@ -26,6 +26,46 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LAUNCHER = "orch"          # 垫片里那个 .py 的名字（Windows 下还会生成 orch.cmd）
+SKILL_SRC = ROOT / "skill" / "SKILL.md"
+
+
+def skill_target() -> Path:
+    """Codex 的用户级 skills 目录。
+
+    不装这个，用户就只能在终端里敲命令——而产品的整个前提是"在 Codex 里说需求、
+    在 Codex 里收结果"。之前安装脚本只装命令，skill 靠口令"自己复制过去"，
+    等于主入口没装。CODEX_HOME 优先，和 codex 自己解析配置的顺序一致。
+    """
+    base = Path(os.environ.get("CODEX_HOME") or (Path.home() / ".codex"))
+    return base / "skills" / "orch" / "SKILL.md"
+
+
+def skill_status() -> tuple[str, str]:
+    """same / missing / differs / nosource。"""
+    dst = skill_target()
+    if not SKILL_SRC.exists():
+        return "nosource", str(SKILL_SRC)
+    if not dst.exists():
+        return "missing", str(dst)
+    same = (SKILL_SRC.read_text(encoding="utf-8")
+            == dst.read_text(encoding="utf-8"))
+    return ("same" if same else "differs"), str(dst)
+
+
+def install_skill() -> tuple[bool, str]:
+    """把 skill/SKILL.md 复制到 Codex 用户级 skills 目录。"""
+    dst = skill_target()
+    if not SKILL_SRC.exists():
+        return False, f"仓库里缺 {SKILL_SRC}"
+    try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        # 统一 LF：Windows 上 checkout 出来常是 CRLF，而 skill 是按行解析 frontmatter 的，
+        # 让格式跟着 git 配置漂移没有好处。
+        text = SKILL_SRC.read_text(encoding="utf-8").replace("\r\n", "\n")
+        dst.write_text(text, encoding="utf-8", newline="\n")
+    except OSError as e:
+        return False, f"{dst} 写不进去：{e}"
+    return True, str(dst)
 
 
 def default_bin_dir() -> Path:
@@ -121,19 +161,32 @@ def verify(bin_dir: Path) -> tuple[bool, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="装 orch 命令（换机器跑一次）")
+    ap = argparse.ArgumentParser(description="装 orch：命令垫片 + Codex skill（换机器跑一次）")
     ap.add_argument("--dir", default=None, help="垫片放哪，默认 ~/bin")
     ap.add_argument("--check", action="store_true", help="只检查")
+    ap.add_argument("--no-skill", action="store_true",
+                    help="只装命令，不往 Codex 的 skills 目录放 orch")
     args = ap.parse_args(argv)
 
     bin_dir = Path(args.dir) if args.dir else default_bin_dir()
 
     if args.check:
         ok, detail = verify(bin_dir)
-        print(f"{'✓' if ok else '✗'} {bin_dir} → {detail}")
+        print(f"{'✓' if ok else '✗'} 命令 {bin_dir} → {detail}")
+        state, where = skill_status()
+        note = {
+            "same": "已装，与仓库一致",
+            "missing": "没装——Codex 里不会出现 orch，只能在终端里敲命令",
+            "differs": "已装但内容与仓库不一致（改过 skill 后没重装）",
+            "nosource": "仓库里没有 skill/SKILL.md",
+        }[state]
+        print(f"{'✓' if state == 'same' else ('!' if state == 'differs' else '✗')} "
+              f"skill → {where}\n     {note}")
         if not ok:
             print("跑 python scripts/install_cli.py 装一次")
-        return 0 if ok else 2
+        elif state != "same":
+            print("跑 python scripts/install_cli.py 补一次，然后重启 Codex")
+        return 0 if (ok and state == "same") else (2 if not ok else 3)
 
     py, shim = write_launcher(bin_dir)
     print(f"已写入 {py.name} / {shim.name}  →  {bin_dir}")
@@ -142,9 +195,20 @@ def main(argv: list[str] | None = None) -> int:
         print("  （在「系统属性 → 环境变量」里追加一条即可；不要用 setx 拼 %PATH%，"
               "它会把超长 PATH 截断）")
 
+    skill_ok = False
+    if args.no_skill:
+        print("- 跳过 skill（--no-skill）：只能从终端用，Codex 对话里不会触发")
+    else:
+        skill_ok, where = install_skill()
+        print(f"{'✓' if skill_ok else '✗'} skill      →  {where}")
+        if not skill_ok:
+            print("  Codex 对话里不会出现 orch；可以用 --dir 之外的方式手动放，或检查权限")
+
     ok, detail = verify(bin_dir)
     if ok:
         print(f"✓ 在任意目录可用：orch --help（用 {shim}）")
+        if skill_ok:
+            print("  下一步：**重启 Codex**，然后在对话里说需求即可——不用开终端。")
         return 0
     print(f"✗ 装好了但跑不通：{detail}")
     print("  先确认 python 能导入：python -c \"import orch\"")

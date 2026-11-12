@@ -146,17 +146,27 @@ class WorktreeManager:
 
     def diff_text(self, wt: Worktree, limit: int = 12000) -> str:
         self.check_lineage(wt)
-        _run(["git", "add", "-A"], wt.path)
-        d = _run(["git", "diff", "--no-textconv", "--cached", wt.base, "--"], wt.path, strip=False)
+        # 用 intent-to-add（-N）而不是真暂存：新文件照样能出现在 diff 里，
+        # 但改动留在工作区。真 `git add` 的后果是验收判据里的 `git diff --name-only`
+        # 永远输出空——planner 大量用这类判据（"只改了 X""新增 1 行"），
+        # 结果是 worker 做对了、验收 0 通过。真跑里抓到的。
+        _run(["git", "add", "-A", "-N"], wt.path, check=False)
+        d = _run(["git", "diff", "--no-textconv", wt.base, "--"], wt.path, strip=False)
         if len(d) > limit:
             d = d[:limit] + f"\n...（diff 已截断，原长 {len(d)} 字符）"
         return d
 
-    def commit(self, wt: Worktree, message: str) -> CommitResult:
+    def commit(self, wt: Worktree, message: str, files: list[str] | None = None) -> CommitResult:
         if self.control:
             self.control.check()
         self.check_lineage(wt)
-        _run(["git", "add", "-A"], wt.path)
+        # 验收通过后才提交，而验收本身会跑命令（pytest 之类）留下缓存。
+        # 所以有明确的文件清单时只 add 这些，不用 -A 把验收垃圾一并带上。
+        if files:
+            _run(["git", "add", "--"] + [str(f) for f in files], wt.path)
+            _run(["git", "add", "-u"], wt.path)          # 已跟踪文件的删除也要算进去
+        else:
+            _run(["git", "add", "-A"], wt.path)
         before = _run(["git", "rev-parse", "HEAD"], wt.path)
         if not _run(["git", "diff", "--no-textconv", "--cached", "--name-only"], wt.path):
             return CommitResult(before, created=False)
@@ -165,6 +175,16 @@ class WorktreeManager:
         if after == before:
             raise GitError("提交未产生新版本")
         return CommitResult(after, created=True)
+
+    def uncommit(self, wt: Worktree, target: str) -> None:
+        """把 HEAD 退回 target，**文件内容留在工作区**（--mixed）。
+
+        用途：验收判据大量是 `git diff ...`，而引擎必须先提交（提交失败就不该继续验收）。
+        两条要求冲突时，就在提交之后把提交"退回去"、让改动回到未暂存状态，
+        验收跑完再重新提交一次。这样判据看到的是工作区，而分支上不会留下半成品。
+        """
+        self.check_lineage(wt)
+        _run(["git", "reset", "--mixed", target], wt.path)
 
     def remove(self, wt: Worktree) -> None:
         _run(["git", "worktree", "remove", "--force", str(wt.path)], self.repo, check=False)
