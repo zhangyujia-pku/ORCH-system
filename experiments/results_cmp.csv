@@ -1,0 +1,2 @@
+﻿plan,arm,status,verify_ok,failures,seconds
+20261106-162159-765a,openai,failed,fail,命令 `python -m pytest -q tests/test_app.py::test_storage_persists_tasks_after_restart` 退出码为 0；该测试使用临时文件，保存任务后重新初始化存储，断言重新,180.1

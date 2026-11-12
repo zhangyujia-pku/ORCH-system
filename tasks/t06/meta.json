@@ -1,0 +1,12 @@
+{
+ "id": "t06",
+ "tier": "L",
+ "goal": "tests/test_more.py 里有若干测试失败。修好它们，不要修改 tests/test_more.py，验收跑 python checks/check_t06.py",
+ "timeout_s": 1800,
+ "accept": [
+  "python checks/check_t06.py"
+ ],
+ "source_commit": "141f38b",
+ "source_subject": "Merge pull request #1116 from rhettinger/random_combinatorics",
+ "upstream": "C:\\probe-repos\\more-itertools"
+}

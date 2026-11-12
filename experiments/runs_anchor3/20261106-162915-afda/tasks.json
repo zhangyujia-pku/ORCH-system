@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词筛选",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py::test_filter_keyword_match tests/test_app.py::test_filter_multiple_matches tests/test_app.py::test_filter_no_match tests/test_app.py::test_filter_empty_tasks` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py::test_filter_preserves_task_content tests/test_app.py::test_filter_preserves_storage_content` 退出码等于 0。",
+        "命令 `git diff --name-only HEAD -- app.py cli.py requirements.txt tasks.json` 的标准输出等于空字符串。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用此前已确定的关键词筛选方向，不重新决定匹配规则。",
+        "其它接口的行为保持原样。",
+        "筛选不得修改原任务内容或持久化存储内容。",
+        "完成后说明实际修改的文件和内容。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现持久化",
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "pytest -q tests/test_app.py 退出码 0"
+      ]
+    },
+    {
+      "id": "t02",
+      "goal": "补充数据文件文档",
+      "reads": [
+        "storage.py"
+      ],
+      "writes": [
+        "README.md"
+      ],
+      "acceptance": [
+        "README.md 包含 `## 数据文件`"
+      ]
+    }
+  ]
+}

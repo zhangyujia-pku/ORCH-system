@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表表格导出能力",
+      "deps": [],
+      "reads": [
+        "README.md",
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 包含导出测试，覆盖正常列表、空列表、中文与逗号/引号/换行字段、写入失败；测试验证表头顺序和回读后的字段值。",
+        "文件断言：tests/test_app.py 包含导出无副作用测试，验证导出前后内存任务数据与临时持久化文件内容相同。",
+        "文件断言：storage.py 提供独立的导出函数，其调用方式、输出格式与编码通过函数文档字符串明确说明。",
+        "命令 git diff --name-only 的输出仅包含 storage.py 和 tests/test_app.py。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        "tests/test_cli.py",
+        "tasks.json",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "仅增加任务列表导出能力，现有接口行为保持不变。",
+        "优先沿用仓库中明确的导出约定；缺少约定时使用标准库 csv 输出 UTF-8 BOM CSV。",
+        "导出列取自现有任务数据模型，固定列顺序。",
+        "测试使用临时目录，不写入仓库内运行期数据。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+```json
+{
+  "spec_md": "# 任务优先级\n## 要实现\n让 storage.py 的 create 接受 priority 参数并保存该字段；list_all 按 priority 降序返回任务。\n## 不能改\n不改 app.py、cli.py、requirements.txt，不手动修改运行期数据 tasks.json。\n## 已定的技术决策\n保持现有存储方式和返回结构，任务对象新增 priority 字段。\npriority 默认值为 0，兼容现有 create 调用。\n历史任务缺少 priority 时按 0 排序。\n相同 priority 保持原有插入顺序。\n本需求属于同一存储行为的关联修改，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级存储排序",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 的 create 接受默认值为 0 的 priority 参数，将该字段保存到任务记录。",
+        "文件断言：tests/test_app.py 包含直接调用 storage 的测试，验证 priority 持久化、降序排列、同优先级顺序稳定、历史记录缺失 priority 按 0 排序及省略参数默认值为 0；测试使用临时存储。",
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码为 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "priority 默认值为 0。",
+        "历史任务缺少 priority 时按 0 排序。",
+        "相同优先级保持插入顺序。",
+        "保持现有存储方式及返回结构。"
+      ]
+    }
+  ]
+}
+```

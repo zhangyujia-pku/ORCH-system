@@ -1,0 +1,11 @@
+---
+run_id: 20261106-153436-290b
+created_at: 2026-11-06T15:34:36+08:00
+repo: <HOME>\WorkBuddy\agent协同项目\orchestrator\demo\tasks_app
+repo_head: 217ecd8
+max_agents: 3
+budget_usd: 6
+ambiguity: 0 []
+---
+
+storage.py 里存着全部任务对象，app.py 只负责把数据转成 JSON。请给 storage.py 加一个 search(keyword)，再让 app.py 调用 storage.py 的这个函数，把结果原样返回。

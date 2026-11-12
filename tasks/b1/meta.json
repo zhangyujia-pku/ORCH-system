@@ -1,0 +1,20 @@
+{
+  "id": "b1",
+  "tier": "B",
+  "goal": "在 src 下 10 个模块（norm_01.py … norm_10.py）里给 normalize_XX 统一加参数校验：value 为 None、不是字符串、或为空串（未传 allow_empty=True）时抛 ValueError，消息里必须包含字段名 value；合法输入的行为保持不变（各文件 docstring 已写明各自的规范化方式）。每个模块一个文件，互不依赖，可以并行改。验收：依次跑 python checks/unit_01.py … unit_10.py，全部退出码 0。",
+  "timeout_s": 2400,
+  "accept": [
+    "python checks/unit_01.py",
+    "python checks/unit_02.py",
+    "python checks/unit_03.py",
+    "python checks/unit_04.py",
+    "python checks/unit_05.py",
+    "python checks/unit_06.py",
+    "python checks/unit_07.py",
+    "python checks/unit_08.py",
+    "python checks/unit_09.py",
+    "python checks/unit_10.py"
+  ],
+  "batch_size": 10,
+  "kind": "参数校验（同构）"
+}

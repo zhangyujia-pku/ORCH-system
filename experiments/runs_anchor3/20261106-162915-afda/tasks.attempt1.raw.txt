@@ -1,0 +1,42 @@
+```json
+{
+  "spec_md": "# 任务关键词筛选\n## 要实现\n在 storage.py 中增加按关键词筛选任务的能力。\n先核对仓库中已有的筛选约定、任务字段和调用方式，沿用可查证的既定方案。\n若仓库未记录此前讨论的匹配字段或匹配规则，先报告缺失信息，不自行重新决定。\n完成后说明修改的文件、行为和验证结果，供用户复测。\n## 不能改\n保持现有接口的签名、返回结构、持久化行为和错误行为不变。\n不修改 app.py、cli.py、requirements.txt 或运行期数据文件。\n不进行无关重构。\n## 已定的技术决策\n筛选能力归属 storage.py，沿用现有存储结构。\n测试沿用仓库现有测试框架。\n本需求作为一个任务交付，避免拆分存在顺序依赖的实现与测试。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词筛选",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "requirements.txt",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/**"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 提供按关键词返回符合既定匹配规则的任务的入口，匹配字段及规则与仓库中可查证的约定一致。",
+        "文件断言：tests/ 中包含关键词命中、多条命中、无匹配和空任务集合的筛选测试，分别断言返回的具体任务集合。",
+        "文件断言：tests/ 中包含筛选不改变原任务内容和存储内容的测试。",
+        "python -m pytest -q 退出码为 0。",
+        "命令 git diff --name-only -- app.py cli.py requirements.txt tasks.json 的输出为空。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用此前已定且可查证的关键词筛选方案；缺失的匹配语义不得自行定案。",
+        "保留其他接口的现有行为。",
+        "完成后报告修改位置与验证结果，由用户再次运行测试。"
+      ]
+    }
+  ]
+}
+```

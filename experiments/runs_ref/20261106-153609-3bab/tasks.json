@@ -1,0 +1,37 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现集中式任务统计",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 定义无参数 stats()，返回包含 total、completed 两个整数字段的字典。",
+        "文件断言：tests/test_app.py 包含隔离任务数据的统计测试，断言空集合返回 {\"total\": 0, \"completed\": 0}、全部未完成的两个任务返回 {\"total\": 2, \"completed\": 0}、一项完成的三个任务返回 {\"total\": 3, \"completed\": 1}。",
+        "文件断言：app.py 的统计返回逻辑直接调用 storage.stats() 或其导入别名，直接返回调用结果。",
+        "文件断言：tests/test_app.py 包含应用层委托测试，替换 stats() 返回指定统计字典后，断言应用层返回相同内容。",
+        "运行 python -m pytest -q tests/test_app.py tests/test_cli.py，退出码为 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "stats() 返回 {\"total\": 任务总数, \"completed\": done 为真的任务数}。",
+        "沿用现有任务读取方式，不修改存储格式。",
+        "app.py 直接返回 stats() 的结果，不重复计算统计值。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

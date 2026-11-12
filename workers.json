@@ -1,0 +1,269 @@
+{
+  "version": 2,
+  "_note": "worker 注册表。argv 是 argv 模板（不是 shell 字符串），占位符：{cwd} {prompt} {model} {port}。caps 的取值：native=开箱可用 / plugin=需装插件或配 key / none=不具备。plugin 只有在 available 置 true 时才真的算可用。 【2026-11-12】glm-flash 未核验（argv_verified=false），已移出默认 ladder；定义保留，可在人工核验后手动加入。",
+  "_caps_legend": "web=实时联网抓正文（不是索引缓存）｜db=直连数据库｜docs=企业文档平台｜net-exec=命令本身能出网",
+  "ladder": [
+    "codex-ds-flash",
+    "codex-ds",
+    "codex"
+  ],
+  "workers": {
+    "local": {
+      "harness": "ollama",
+      "model": "qwen3:4b",
+      "argv_verified": false,
+      "argv": [
+        "ollama",
+        "run",
+        "{model}",
+        "{prompt}"
+      ],
+      "quota": 0.0,
+      "max_files": 2,
+      "handles_docs": true,
+      "handles_code": false,
+      "handles_semantic": false,
+      "tools_selectable": false,
+      "caps": {
+        "web": "none",
+        "db": "none",
+        "docs": "none",
+        "net-exec": "none"
+      },
+      "available": {},
+      "note": "[未核验] 本机从未跑通，已移出 ladder，不进自动路由；本地小模型只接文档类：改 .md/.txt，单文件、无命令判据。ollama run 本身没有 agent loop，不能直接改仓库——真正接进来需要一个读写文件的外壳（见 README「本地模型的三种接法」）。"
+    },
+    "dsh": {
+      "harness": "deepseek-harness",
+      "model": "deepseek-v4-pro",
+      "argv_verified": false,
+      "argv": [
+        "npx",
+        "-y",
+        "@deepseek-ai/dsh",
+        "run",
+        "--headless",
+        "--cwd",
+        "{cwd}",
+        "--model",
+        "{model}",
+        "{prompt}"
+      ],
+      "quota": 0.2,
+      "max_files": 3,
+      "handles_docs": true,
+      "handles_code": true,
+      "handles_semantic": true,
+      "tools_selectable": false,
+      "caps": {
+        "web": "plugin",
+        "db": "plugin",
+        "docs": "none",
+        "net-exec": "native"
+      },
+      "available": {
+        "web": false,
+        "db": false
+      },
+      "note": "[未核验] 本机从未跑通，已移出 ladder，不进自动路由；DeepSeek Harness（MIT，2026-08 开发者预览）。基于 Cordis 插件框架，MCP 只需几行 YAML。db 走 db-connector / dsh-data-agent（SQLite/PostgreSQL/MySQL，只读查询 + 写审批 + JSONL 审计）；web 需装 dsh-web-search 或 dsh-tavily，默认没有联网插件。Windows 上只能用 Node CLI，Python SDK 只支持 Linux/macOS。"
+    },
+    "cbc": {
+      "harness": "workbuddy-cli",
+      "model": "deepseek-v4.1-flash",
+      "argv_verified": false,
+      "argv": [
+        "{cbc_bin}",
+        "-p",
+        "--port",
+        "{port}",
+        "--output-format",
+        "json",
+        "--model",
+        "{model}",
+        "--permission-mode",
+        "acceptEdits",
+        "--add-dir",
+        "{cwd}",
+        "{prompt}"
+      ],
+      "quota": 0.3,
+      "max_files": 4,
+      "handles_docs": true,
+      "handles_code": true,
+      "handles_semantic": true,
+      "tools_selectable": true,
+      "caps": {
+        "web": "native",
+        "db": "plugin",
+        "docs": "native",
+        "net-exec": "native"
+      },
+      "available": {
+        "web": true,
+        "db": false,
+        "docs": true,
+        "net-exec": true
+      },
+      "note": "[未核验] 本机从未跑通，已移出 ladder，不进自动路由；WorkBuddy 自带 CLI（codebuddy / cbc）。**本机实测：未登录，-p 模式直接返回 Authentication required；json 模式下会静默返回空 result，看起来像成功。**需先执行一次 `codebuddy /login`（交互式，agent 做不了）。另：-p 的位置参数被当成附件路径而非 prompt，prompt 很可能要走 stdin——登录后需重新核验 argv 形态。--port 必须显式给：默认端口被桌面端占用会 EADDRINUSE。"
+    },
+    "codex": {
+      "harness": "codex-cli",
+      "model": null,
+      "argv_verified": true,
+      "argv": [
+        "{codex_bin}",
+        "exec",
+        "--json",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "workspace-write",
+        "-C",
+        "{cwd}",
+        "{prompt}"
+      ],
+      "quota": 1.0,
+      "max_files": 999,
+      "handles_docs": true,
+      "handles_code": true,
+      "handles_semantic": true,
+      "tools_selectable": false,
+      "caps": {
+        "web": "plugin",
+        "db": "none",
+        "docs": "none",
+        "net-exec": "plugin"
+      },
+      "available": {
+        "web": false,
+        "net-exec": false
+      },
+      "note": "基线档，纯代码/大重构最强。但联网是它的短板不是价格问题：workspace-write 沙箱默认 network_access=false，web search 默认 cached（OpenAI 索引），要实时抓得显式 --search 或 web_search=\"live\"，且 MCP 需人工批准。所以联网调研任务不该派给它——不是省钱，是它会拿着缓存索引编一个像样的答案。"
+    },
+    "codex-ds": {
+      "harness": "codex-cli",
+      "model": "deepseek-v4-pro",
+      "argv_verified": true,
+      "argv": [
+        "{codex_bin}",
+        "exec",
+        "--json",
+        "-c",
+        "model_provider=custom",
+        "-c",
+        "model_providers.custom.name=deepseek",
+        "-c",
+        "model_providers.custom.base_url=https://api.deepseek.com",
+        "-c",
+        "model_providers.custom.wire_api=responses",
+        "-c",
+        "model_providers.custom.env_key=DEEPSEEK_KEY",
+        "-m",
+        "{model}",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "workspace-write",
+        "-C",
+        "{cwd}",
+        "{prompt}"
+      ],
+      "quota": 0.6,
+      "max_files": 999,
+      "handles_docs": true,
+      "handles_code": true,
+      "handles_semantic": true,
+      "tools_selectable": false,
+      "caps": {
+        "web": "none",
+        "db": "none",
+        "docs": "none",
+        "net-exec": "plugin"
+      },
+      "available": {},
+      "note": "同一个 Codex 外壳换 DeepSeek 后端：DeepSeek 原生支持 Responses API，改 base_url + wire_api 即可，不需要 CC Switch 的代理。★ 必须用 env_key，不能用 requires_openai_auth——后者会让 codex 去读自己的登录态（OpenAI token），DeepSeek 不认，表现为 401 而 key 本身是好的。实测 exit=0、8246 tokens。"
+    },
+    "codex-ds-flash": {
+      "harness": "codex-cli",
+      "model": "deepseek-flash",
+      "argv_verified": true,
+      "argv": [
+        "{codex_bin}",
+        "exec",
+        "--json",
+        "-c",
+        "model_provider=custom",
+        "-c",
+        "model_providers.custom.name=deepseek",
+        "-c",
+        "model_providers.custom.base_url=https://api.deepseek.com",
+        "-c",
+        "model_providers.custom.wire_api=responses",
+        "-c",
+        "model_providers.custom.env_key=DEEPSEEK_KEY",
+        "-m",
+        "{model}",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "workspace-write",
+        "-C",
+        "{cwd}",
+        "{prompt}"
+      ],
+      "quota": 0.6,
+      "max_files": 999,
+      "handles_docs": true,
+      "handles_code": true,
+      "handles_semantic": true,
+      "tools_selectable": false,
+      "caps": {
+        "web": "none",
+        "db": "none",
+        "docs": "none",
+        "net-exec": "plugin"
+      },
+      "available": {},
+      "note": "Codex 外壳 + DeepSeek-V4.1-Flash。★ 原生 API 的模型 id 是 `deepseek-flash`，不是 WorkBuddy 里那个 `deepseek-v4.1-flash`（后者会被 API 直接拒绝：supported names are deepseek-flash, deepseek-v4-pro）。1M 上下文 / 393k 输出 / 支持图片输入，effort 默认 high。"
+    },
+    "glm-flash": {
+      "harness": "codex-cli",
+      "model": "glm-5.3-flash",
+      "argv_verified": false,
+      "quota": 0.0,
+      "max_files": 999,
+      "handles_docs": true,
+      "handles_code": true,
+      "handles_semantic": true,
+      "tools_selectable": true,
+      "caps": {
+        "web": "none",
+        "db": "none",
+        "docs": "none",
+        "net-exec": "plugin"
+      },
+      "available": {},
+      "argv": [
+        "{codex_bin}",
+        "exec",
+        "--json",
+        "-c",
+        "model_provider=custom",
+        "-c",
+        "model_providers.custom.name=zhipu",
+        "-c",
+        "model_providers.custom.base_url=https://open.bigmodel.cn/api/v1",
+        "-c",
+        "model_providers.custom.wire_api=responses",
+        "-c",
+        "model_providers.custom.env_key=GLM_KEY",
+        "-m",
+        "{model}",
+        "--skip-git-repo-check",
+        "--sandbox",
+        "workspace-write",
+        "-C",
+        "{cwd}",
+        "{prompt}"
+      ],
+      "note": "智谱 GLM。**必须走 Responses 端点**：base_url=https://open.bigmodel.cn/api/v1、wire_api=responses。codex 0.167 起不再支持 wire_api=chat（配置加载阶段直接报错），所以 /api/paas/v4 那套 chat completions 已不可用。账号若只有 Coding Plan，需用套餐专用 key。免费额度以官方为准。需 GLM_KEY。 账号内可用档位实测：glm-5.3-flash 可用；glm-4.7-flash（早前宣称免费）不在本账号目录且持续 429。"
+    }
+  }
+}

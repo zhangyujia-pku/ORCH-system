@@ -1,0 +1,53 @@
+```json
+{
+  "spec_md": "# 任务数据持久化\n## 要实现\n任务数据保存到本地 JSON 文件，重启应用或 CLI 后可恢复。\n新增、修改、删除成功后立即保存；首次运行没有数据文件时按空任务列表处理。\n采用原子替换写入，避免写入中断破坏已有数据。\n损坏的数据文件或读写失败必须明确报错，不得静默清空或覆盖已有数据。\n## 不能改\n保留现有任务字段、接口与 CLI 命令的使用方式。\n不得提交运行期数据、缓存或日志，不得引入数据库或无关重构。\n## 已定的技术决策\n沿用 Python 与现有依赖，通过 storage.py 统一管理持久化。\n使用 UTF-8 JSON，默认数据文件为 tasks.json。\n写入时在目标文件同目录创建临时文件，完成写入后原子替换目标文件。\n测试使用临时目录，禁止读写仓库中的真实 tasks.json。\n本需求涉及共享存储逻辑与调用方的顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据的可靠持久化",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "运行 `python -m pytest -q tests/test_app.py tests/test_cli.py`，退出码为 0。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 包含使用临时目录的自动化测试，覆盖创建、修改、删除后的重新加载，并断言重新加载结果与最后一次成功操作一致。",
+        "文件断言：tests/test_cli.py 包含通过两个独立 CLI 进程访问同一临时数据文件的测试，断言第二个进程能读取第一个进程保存的任务。",
+        "文件断言：测试覆盖数据文件不存在、中文内容往返、损坏 JSON、写入失败；断言缺失文件返回空列表，损坏文件明确报错且内容不变，写入失败明确报错且已有文件内容不变。",
+        "文件断言：storage.py 使用目标文件同目录的临时文件与原子替换完成保存，失败时清理临时文件。",
+        "文件断言：README.md 说明默认数据文件位置、保存时机、重启恢复行为、损坏文件与读写失败的处理方式。",
+        "运行 `git diff --name-only -- tasks.json requirements.txt .gitignore`，标准输出为空。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        "requirements.txt",
+        ".gitignore",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "Python 与现有依赖；不引入数据库。",
+        "storage.py 统一管理 UTF-8 JSON 持久化，默认文件为 tasks.json。",
+        "保留现有任务字段、接口与 CLI 使用方式。",
+        "采用同目录临时文件加原子替换；错误不得导致静默丢失已有数据。",
+        "测试隔离运行期数据，使用临时目录。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "在 storage.py 文件开头加一行注释：# storage v2",
+      "writes": [
+        "storage.py"
+      ],
+      "reads": [],
+      "deps": [],
+      "acceptance": [
+        "文件断言：storage.py 含 `# storage v2`。"
+      ]
+    }
+  ]
+}

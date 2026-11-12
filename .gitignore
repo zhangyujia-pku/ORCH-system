@@ -1,0 +1,35 @@
+# 不进版本库的东西
+#
+# 原则：源码与证据进库，**运行痕迹不进库**。
+# 运行记录里全是绝对路径和中间产物，进了库既污染 diff，也会让 clone 的人
+# 在自己的机器上看到一堆"已删除"的文件。
+
+runs/
+.orch-runs/
+dist/
+*.bundle
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# 评审快照：阶段性产物，不是源码
+.step*-review/
+
+# demo 夹具的原始仓库（自带 .git，会变成 gitlink）
+# 用 scripts/make_demo.py 从 demo/fixture 重建
+demo/tasks_app/
+
+# 本地环境与临时文件
+.venv/
+venv/
+.env
+*.log
+report/_chk/
+
+# 实验运行留下的临时 worktree：它们是嵌套 git 仓库，进库会变成 112 个空 gitlink。
+# 每次运行都会重建，不属于证据（证据是 json / log / csv）。
+experiments/**/wt/

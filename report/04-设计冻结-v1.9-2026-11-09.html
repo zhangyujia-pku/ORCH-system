@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>设计冻结候选：orch 作为 Codex 的前台批处理层</title>
+<style>
+  @page { size: A4; }
+  * { box-sizing: border-box; }
+  body { font-family: "Source Han Serif SC","Songti SC","SimSun",serif;
+         font-size: 10.2pt; line-height: 1.60; color: #1a1a1a; margin: 0; }
+  h1,h2,h3 { font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif; }
+  h1 { font-size: 19pt; margin: 0 0 6pt; line-height: 1.35; }
+  h2 { font-size: 13pt; margin: 14pt 0 6pt; padding-bottom: 4pt;
+       border-bottom: 1.2pt solid #222; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 13pt 0 5pt; page-break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  .meta { color: #666; font-size: 9.5pt; margin: 0 0 3pt; }
+  .titleblock { border-top: 3pt solid #1a1a1a; padding-top: 13pt; margin-bottom: 14pt; }
+  .lead { font-size: 11.5pt; color: #333; margin: 0 0 8pt; }
+  table { width: 100%; border-collapse: collapse; margin: 7pt 0 10pt; font-size: 9.5pt; }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  th,td { padding: 3.2pt 6pt; border-bottom: .6pt solid #d8d8d8; text-align: left; vertical-align: top; }
+  th { background: #f0f0ee; border-bottom: 1pt solid #999; font-weight: 700;
+       font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif; }
+  td.n,th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  code { font-family: "Cascadia Mono","Consolas",monospace; font-size: 9pt;
+         background: #f2f2f0; padding: 1pt 3pt; }
+  pre { font-family: "Cascadia Mono","Consolas",monospace; font-size: 8.5pt;
+        background: #f6f6f4; padding: 8pt 10pt; line-height: 1.55; overflow: hidden;
+        border-left: 2pt solid #ccc; page-break-inside: avoid; margin: 8pt 0; }
+  .callout { border: .8pt solid #1a1a1a; padding: 9pt 11pt; margin: 10pt 0;
+             page-break-inside: avoid; }
+  .callout .label { font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif;
+                    font-size: 8.5pt; letter-spacing: 1pt; color: #666; margin-bottom: 4pt; }
+  .callout p:last-child { margin-bottom: 0; }
+  ol,ul { margin: 0 0 9pt; padding-left: 17pt; }
+  li { margin-bottom: 3pt; }
+  .small { font-size: 9pt; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <div class="meta" style="letter-spacing:1pt;">设计冻结 · v1.9 · 已冻结</div>
+  <h1>orch 作为 Codex 的前台批处理层</h1>
+  <p class="lead">目标：把 Codex 的额度花在"理解"和"交代"上，把"干活"外包给便宜算力</p>
+  <p class="meta">changkong34@qq.com · 2026 年 11 月 9 日 · v1.9 办公工具链闭环 · 封存于 tag <code>v1.9</code></p>
+</div>
+
+<div class="callout">
+  <div class="label">冻结声明</div>
+  <p><strong>本稿自 2026-11-09 起生效，对应代码 tag <code>v1.9</code>。</strong>
+  冻结的是四样东西：契约字段、命令面、错误码、验收标准。
+  不冻结的是"以后想加什么"——新增能力必须按 §8 的流程走，不许悄悄改。</p>
+  <p class="small">判定依据不是"写完了"，而是：337 个测试全绿、四次真实对话端到端跑通、
+  任意一次运行可撤销、办公产物可生成且可断言。<b>这四条都能在另一台机器上复现</b>，
+  方法见 §8.1。</p>
+</div>
+
+<h2>1　用户旅程</h2>
+
+<p>三种模式共用同一个开头和结尾，中间的执行形态不同。用户<strong>全程只做两件事</strong>：
+在聊天窗口丢文件、说一句需求；最后看结论。</p>
+
+<h3>1.1　M1 单线（一个产出物）</h3>
+
+<pre>用户：这批文件按模板统一格式（附 8 个文件）
+Codex：① 读需求 → 写 intent  ② 调 orch dispatch  ③ 等结果  ④ 转述
+orch：单任务 → 一个 worktree → 一个 worker → 验收 → 出产物
+用户：（结果回到聊天，附产物）</pre>
+
+<p>适用：产出物唯一，或改动集中在一处。Codex 调用 <strong>1 次</strong>（阻塞返回）。</p>
+
+<h3>1.2　M2 并线（多个互不相关产出物）</h3>
+
+<pre>用户：把这 12 篇稿子各自改成公众号版
+Codex：① 写 intent  ② dispatch  ③ 轮询  ④ 汇总差异  ⑤ 转述
+orch：拆 12 个任务 → 每任务一个 worktree → 并行执行 → 全绿后合并 → 产物
+用户：（收到"12 篇完成，2 篇需人工看"）</pre>
+
+<p>适用：任务之间写入集互斥、无隐性依赖。Codex 调用 <strong>1 次</strong>；超过 8 分钟时加 1 次 <code>resume</code>。</p>
+
+<h3>1.3　M3 串联（后一步依赖前一步）</h3>
+
+<pre>用户：先梳理这份报告的结构，再按结构重写
+Codex：① 写 intent  ② dispatch  ③ 轮询  ④ 转述
+orch：阶段1 出大纲 → handoff → 阶段2 按大纲重写 → 同一 worktree 内完成
+用户：（收到最终稿 + 一份"大纲→成稿"的对应说明）</pre>
+
+<p>适用：后一步"必须看到前一步的结果才知道怎么做"。Codex 调用 <strong>1 次</strong>。</p>
+
+<h2>2　skill 的结构</h2>
+
+<p>skill 是<strong>路由表</strong>，不是说明书。Codex 照着走，不需要判断"该不该"。</p>
+
+<pre>~/.workbuddy/skills/orch-dispatch/
+  SKILL.md            ← 一屏：前置检查 + 判断树 + 命令表
+  references/
+    contract.md       ← 契约字段与 26 条规则（出错时才读）
+    errors.md         ← 报错码 → 动作 对照（出错时才读）</pre>
+
+<h3>2.1　SKILL.md 的骨架</h3>
+
+<table>
+  <thead><tr><th style="width:22%">段落</th><th>内容</th></tr></thead>
+  <tbody>
+  <tr><td>前置检查</td><td>自动批准模式是否开启 / key 是否可读 / 目标是否 git 仓库。任一不满足 → 直接告知用户，不继续</td></tr>
+  <tr><td>判断树</td><td>五条 if，输出三种模式之一（见 §3.1）</td></tr>
+  <tr><td>命令表</td><td>每种模式对应哪条 <code>orch</code> 命令、传什么参数</td></tr>
+  <tr><td>失败处理</td><td>遇到 E0xx 时读 <code>references/errors.md</code>，按表动作</td></tr>
+  <tr><td>禁止项</td><td>不得自行浏览仓库；不得修改用户文件；不得跳过 dispatch 直接改代码</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="label">一条硬规矩</div>
+  <p><strong>Codex 在 plan 阶段禁止主动探索仓库。</strong>它只允许读用户提供的文件与需求文本。
+  探索是 orch 的活——那部分走便宜算力，不烧额度。这条要写进"禁止项"，不能靠自觉。</p>
+</div>
+
+<h3>2.4　规划分三层</h3>
+
+<p>规划不是一个模型干的活。它分三段，每段的成本结构完全不同——<strong>把强模型用在"理解"，把便宜模型用在"改格式"</strong>，这是省钱的关键。</p>
+
+<table>
+  <thead><tr><th style="width:14%">阶段</th><th style="width:16%">谁做</th><th style="width:20%">输出</th><th style="width:14%">用强模型</th><th>为什么</th></tr></thead>
+  <tbody>
+  <tr><td><strong>初版计划</strong></td><td>Codex</td><td><code>tasks.json</code></td><td>是</td><td>理解需求最吃模型能力，这一步值这个钱</td></tr>
+  <tr><td><strong>校验</strong></td><td>orch 规则</td><td>E0xx 错误清单</td><td>不需要</td><td>纯规则，零 token</td></tr>
+  <tr><td><strong>修补</strong></td><td>DeepSeek</td><td>修补后的计划</td><td>否</td><td>补锚点、拆任务这类机械改写，便宜模型够用</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="label">一条铁律：修补不能放宽标准</div>
+  <p>如果修补由便宜模型做，它最省力的路径是<strong>把判据改松来让自己通过</strong>。必须明令禁止，并由校验器核对修补前后的差异。</p>
+</div>
+
+<table>
+  <thead><tr><th style="width:50%">允许</th><th>禁止</th></tr></thead>
+  <tbody>
+  <tr><td>补锚点（加文件名、数字、反引号符号）</td><td>删除或合并判据</td></tr>
+  <tr><td>把含糊判据改写成可执行命令</td><td>把命令型判据改成断言型</td></tr>
+  <tr><td>把一个任务拆成两个</td><td>扩大 <code>writes</code></td></tr>
+  </tbody>
+</table>
+
+<p>校验器在修补前后做对比，出现下列任一情况即<strong>拒绝</strong>：判据总数减少、任一任务的 <code>writes</code> 变大、某个任务失去全部命令型与锚点判据。</p>
+
+<p><strong>修补上限 2 轮</strong>，超过就退回 Codex，由它决定是补需求还是放弃。
+无限修补会把"需求没写清"的成本，悄悄转成"模型反复改"的成本——而后者更贵且不可见。</p>
+
+<p class="small">Codex 在出计划时不能探索仓库（探索走便宜模型），所以初版计划必然缺上下文——
+<strong>这正是修补存在的理由</strong>，不是初版没写好。</p>
+
+<h3>2.5　执行单元有三层，不是两层</h3>
+
+<p>谈"换哪个模型"之前必须先分清三层。它们各自独立，混在一起谈就会得出错误结论。</p>
+
+<table>
+  <thead><tr><th style="width:14%">层</th><th style="width:34%">决定什么</th><th>现状</th></tr></thead>
+  <tbody>
+  <tr><td><strong>壳</strong> harness</td><td>能起什么进程、能不能多轮、沙箱边界</td><td>只有 <code>codex-cli</code> 在本机核验通过</td></tr>
+  <tr><td><strong>模型</strong> model</td><td>判断质量、花多少钱</td><td>三档，实测质量无差异</td></tr>
+  <tr><td><strong>工具</strong> tool</td><td>有没有确定性的转换与断言脚本</td><td>docx / xlsx / pptx 的<b>内容层</b>已覆盖（生成 + 断言）；版式层仍空</td></tr>
+  </tbody>
+</table>
+
+<p>办公文档任务的瓶颈<strong>不在壳，在工具</strong>。换一个"更会写脚本的壳"，
+换掉的只是"每次都要现写脚本"这件事的执行者，没换掉"每次都要现写"本身。</p>
+
+<p>所以本设计给工具留了独立位置：壳跑不动的地方，由脚本跑——脚本不改主意，
+两次结果一样，能被单测。注册表只为<b>本机核验过</b>的工具开放自动选中，
+未核验的登记在册但不参与路由（重演过：未核验的档被兜底选中，失败却记成模型问题）。</p>
+
+<h2>3　契约增补</h2>
+
+<p>现有 9 个字段够用，补三个。</p>
+
+<table>
+  <thead><tr><th style="width:18%">字段</th><th style="width:16%">归属</th><th>语义</th></tr></thead>
+  <tbody>
+  <tr><td><code>mode</code></td><td>全局</td><td><code>single</code> / <code>parallel</code> / <code>chain</code>。由 planner 提议，校验器复核</td></tr>
+  <tr><td><code>inputs_from</code></td><td>M3 / chain 必填</td><td>读哪个任务的产物。比 <code>deps</code> 更具体：<code>deps</code> 说"先后"，它说"读什么"</td></tr>
+  <tr><td><code>handoff</code></td><td>M3 运行时填</td><td>交接说明。默认内联 ≤200 字；超限自动转引用形态（见 §3.5）。不让完整对话进上下文</td></tr>
+  <tr><td><code>integration</code></td><td>全局，可选</td><td>集成级判据的来源文件（如 <code>.orch/verify.json</code>）。缺省则跳过集成验收</td></tr>
+  </tbody>
+</table>
+
+<h3>3.1　判断树（写进 skill）</h3>
+
+<p><strong>第 0 步：要不要走这条线。</strong>Codex 有权拒绝调用编排，自己单干——见 §3.3。
+判据有两个维度：<strong>互动类型</strong>（用户想干什么）与<strong>改动位置数</strong>（要动几处）。
+不看行数——行数是伪精确：改 5 行横跨 3 个文件，风险高于改 40 行在同一函数内。</p>
+
+<table>
+  <thead><tr><th style="width:20%">互动类型</th><th style="width:30%">判据</th><th style="width:14%">结论</th><th>理由</th></tr></thead>
+  <tbody>
+  <tr><td><strong>提问 / 解释</strong></td><td>不产出文件，只回答问题</td><td><strong>自干</strong></td><td>没有产出物，编排无意义</td></tr>
+  <tr><td><strong>单点修改</strong></td><td>1 个文件 × 1 处连续位置</td><td><strong>自干</strong></td><td>用户能一眼验收，不需要机器判</td></tr>
+  <tr><td><strong>探索</strong></td><td>还不知道要改什么</td><td><strong>自干一轮</strong></td><td>探明之后再回到第 0 步重判</td></tr>
+  <tr><td><strong>多点修改</strong></td><td>位置数 ≥ 2（同文件多处也算）</td><td>走编排</td><td>需要逐点验收，人眼容易漏</td></tr>
+  <tr><td><strong>批量同构</strong></td><td>N ≥ 2 份同类产物</td><td>走编排</td><td>即使每份都简单，数量本身就是风险</td></tr>
+  <tr><td><strong>跨文件改动</strong></td><td>涉及 ≥ 2 个文件</td><td>走编排</td><td>需要确认改动之间的一致性</td></tr>
+  </tbody>
+</table>
+
+<p class="small"><strong>"一处"的定义</strong>：一个文件中的一个连续位置——一个函数、一个段落、一条配置项。
+不是"一段 diff"，也不是"一片区域"。判据要在<strong>动手之前</strong>声明，不能改完了再补。</p>
+
+<p><strong>第 1 步：走哪条线。</strong>进入编排后，按下面的表选模式。</p>
+
+<table>
+  <thead><tr><th style="width:46%">条件</th><th style="width:16%">模式</th><th>理由</th></tr></thead>
+  <tbody>
+  <tr><td>需求只涉及一个产出物</td><td>single</td><td>没有可并行的部分</td></tr>
+  <tr><td>多个产出物，且彼此不读对方结果</td><td>parallel</td><td>并行收益最大</td></tr>
+  <tr><td>后一步必须看到前一步的结果才知道怎么做</td><td>chain</td><td>依赖是隐性的</td></tr>
+  <tr><td>多个产出物写同一文件</td><td>chain</td><td>并行必冲突，只能排队</td></tr>
+  <tr><td>单个产出物超一次上下文能装下的量</td><td>chain</td><td>必须分段处理</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2　模式与计划的自洽性（新增三条规则）</h3>
+
+<table>
+  <thead><tr><th style="width:14%">编号</th><th style="width:40%">检查</th><th>动作</th></tr></thead>
+  <tbody>
+  <tr><td><code>E021</code></td><td>声明 parallel，但写入集有交集</td><td>打回，要求改 chain 或拆任务</td></tr>
+  <tr><td><code>E022</code></td><td>声明 chain，但没有 <code>inputs_from</code></td><td>打回，要求声明阶段依赖</td></tr>
+  <tr><td><code>E023</code></td><td>声明 single，但计划里任务数 &gt; 1</td><td>打回，模式与计划不符</td></tr>
+  </tbody>
+</table>
+
+<p class="small">这三条的意义：让模型提议、让规则裁决。模式选错不会等到合并冲突才发现。</p>
+
+<h3>3.3　自干通道（Codex 有权拒绝）</h3>
+
+<p>Codex 可以判断"这活不值得走编排"，直接自己做——否则每个小活都要付一次编排的固定成本。</p>
+
+<p>但这有个失败模式：<strong>自干最省事，而它烧的正是要省的额度。</strong>用三条约束框住。</p>
+
+<table>
+  <thead><tr><th style="width:20%">约束</th><th>规则</th></tr></thead>
+  <tbody>
+  <tr><td><strong>默认编排</strong></td><td>判据是"明确符合自干条件才自干"，不是"觉得麻烦就自干"。
+      错判的代价不对称：该编排却自干 → 额度白烧且没有验收；该自干却编排 → 只浪费几分钟。所以宁严不宽。</td></tr>
+  <tr><td><strong>必须记账</strong></td><td>每次自干往 <code>.orch/bypass.log</code> 追加一行：时间、互动类型、位置数、一句话摘要。
+      未声明判据就动手的，视为违规。</td></tr>
+  <tr><td><strong>必须交代</strong></td><td>回复用户时说清"这次我自己做了，因为只有一处改动"。
+      不说明的话，用户无法判断是编排失败还是有意绕过。</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="label">为什么"必须记账"是硬要求</div>
+  <p>没有记账，就无法回答"自干率是否合理"。自干率过高说明额度没省下来；过低说明编排被滥用在小活上。
+  <strong>这个数字是产品是否健康的主要指标之一</strong>，而不是调试信息。</p>
+</div>
+
+<p>自干的产出<strong>仍然要满足同样的质量线</strong>——只是不建 worktree、不写契约、不跑机器验收。
+省掉的是工装，不是正确性。</p>
+
+<h3>3.4　验收分两层</h3>
+
+<p>每个任务各有判据（任务级），但<strong>"各自通过 + 合并成功"不等于"拼起来能用"</strong>。需要第二层。</p>
+
+<table>
+  <thead><tr><th style="width:14%">层</th><th style="width:44%">判据来源</th><th>回答什么</th></tr></thead>
+  <tbody>
+  <tr><td><strong>任务级</strong></td><td>契约里每个任务的 <code>acceptance</code></td><td>这一块改对了吗</td></tr>
+  <tr><td><strong>集成级</strong></td><td>仓库内固定文件（<code>.orch/verify.json</code>），worker 不可写</td><td>拼起来还能用吗</td></tr>
+  </tbody>
+</table>
+
+<p>三种结果必须分开报，因为处置完全不同：</p>
+
+<table>
+  <thead><tr><th style="width:16%">任务级</th><th style="width:16%">集成级</th><th style="width:34%">含义</th><th>处置</th></tr></thead>
+  <tbody>
+  <tr><td>全绿</td><td>通过</td><td>真的成了</td><td>交付</td></tr>
+  <tr><td>全绿</td><td><strong>失败</strong></td><td><strong>拆分有问题</strong>，不是某个 worker 的错</td><td>停，转重规划或人工</td></tr>
+  <tr><td>有红</td><td>不跑</td><td>有任务没做完</td><td>按失败处理</td></tr>
+  </tbody>
+</table>
+
+<p><strong>"任务绿但集成红"是这一层存在的全部理由。</strong>它是唯一能暴露"拆错了"的信号——
+只看任务级的话，这种失败会显示为成功。</p>
+
+<p class="small">为什么判据放固定文件而不是契约：契约由 planner 生成，planner 可能把标准写松；
+固定文件由维护者维护并列入写集保护，worker 改不动。</p>
+
+<h3>3.5　handoff 溢出的降级</h3>
+
+<p>串联模式下，上一阶段给下一阶段的交接说明默认 200 字以内。
+但当前一步产出的是几十页结构时，200 字装不下——<strong>强行压缩会把决策理由丢掉</strong>，
+而决策理由恰恰是下一阶段最需要的东西。</p>
+
+<p>所以设两种形态，超限自动切换，<strong>不截断</strong>：</p>
+
+<table>
+  <thead><tr><th style="width:14%">形态</th><th style="width:16%">触发</th><th style="width:34%">存放</th><th>下一阶段看到</th></tr></thead>
+  <tbody>
+  <tr><td><strong>内联</strong></td><td>≤ 200 字</td><td>契约字段 <code>handoff</code></td><td>全文</td></tr>
+  <tr><td><strong>引用</strong></td><td>&gt; 200 字</td><td><code>.orch/handoff/&lt;task&gt;.md</code>，不提交</td><td>摘要 + 文件路径</td></tr>
+  </tbody>
+</table>
+
+<p>三条规则：</p>
+
+<ol>
+  <li><strong>不截断</strong>。超限就转引用，截断会静默丢信息——比报错更危险。</li>
+  <li><strong>引用形态仍要 80–200 字摘要</strong>。只给路径等于让下一阶段从零读起，还不如不给。</li>
+  <li><strong>交接文件写进 worktree 但列入 <code>.gitignore</code></strong>：越界检查豁免、合并不追踪、不进产物。</li>
+</ol>
+
+<div class="callout">
+  <div class="label">溢出次数是设计信号，不是运行日志</div>
+  <p>一个阶段需要写上千字交接，说明<strong>它本身该被拆成两段</strong>。
+  溢出次数记进 trace，连续出现就是阶段粒度过粗的证据——这是 M3 唯一的自校正信号。</p>
+</div>
+
+<h3>3.6　任务入选标准：判据能不能写成一条命令</h3>
+
+<p>"文档类任务能不能做"这个问题没有统一答案，因为它其实是三种东西：</p>
+
+<table>
+  <thead><tr><th style="width:16%">类型</th><th style="width:34%">例子</th><th style="width:22%">判据能写成命令吗</th><th>结论</th></tr></thead>
+  <tbody>
+  <tr><td><strong>文本内容</strong></td><td>改写、摘要、润色、翻译</td><td>能：字数、禁用词、标题保留、术语覆盖</td><td><strong>通</strong>（10 份实测 10/10）</td></tr>
+  <tr><td><strong>结构操作</strong></td><td>合并、拆分、抽表格、批量替换字段</td><td>能：段落数、字段值、序号连续</td><td><strong>通</strong></td></tr>
+  <tr><td><strong>排版呈现</strong></td><td>样式、页边距、图文混排、PPT 视觉</td><td><strong>不能</strong>：只能"看着对"</td><td><strong>不通</strong></td></tr>
+  </tbody>
+</table>
+
+<p>分界线不是文件后缀，是<strong>判据能不能写成一条没人看也能跑的断言</strong>。</p>
+
+<div class="callout">
+  <div class="label">这条标准同时是实验效度问题，不只是工程问题</div>
+  <p>判据弱 → "任务是否成功"这个因变量带噪声 → 拿它算成功率、算返工次数，结论不可用。
+  所以任务必须<b>先过可断言性，再进实验集</b>：写不出命令的案例，换案例，不是换判据。</p>
+</div>
+
+<p>实践上还有一条：<strong>实验用 <code>.md</code>，不要为了"文档感"去生成 <code>.docx</code></strong>。
+排版环节不可验收，把它拉进主实验只会污染数据。</p>
+
+<p>确实要产出办公文件时，走确定性流水线而不是让模型自由发挥。
+三种格式同构：<strong>模型只写内容，结构交给脚本，判据交给脚本</strong>。</p>
+
+<table>
+  <thead><tr><th style="width:12%">产物</th><th style="width:20%">先写</th><th style="width:26%">再转（脚本）</th><th>再断言（脚本）</th></tr></thead>
+  <tbody>
+  <tr><td><code>.docx</code></td><td>同名 <code>.md</code></td><td><code>docxgen</code></td><td><code>docxcheck --min-chars</code></td></tr>
+  <tr><td><code>.xlsx</code></td><td><code>.csv</code> 或含管道表的 <code>.md</code></td><td><code>xlsxgen</code></td><td><code>xlsxcheck --min-rows --cell A1=值</code></td></tr>
+  <tr><td><code>.pptx</code></td><td><code>.md</code> 大纲</td><td><code>pptxgen</code></td><td><code>pptxcheck --min-slides --require-title</code></td></tr>
+  </tbody>
+</table>
+
+<p>生成器写完会跑一次<strong>结构自检</strong>：内容类型是否覆盖每个部件、关系目标是否存在、
+<code>r:id</code> 是否都有对应关系。这三样对不上，PowerPoint 只会说"无法读取"，
+不告诉你哪儿错了——所以自检放在生成时，错误停在能看懂的地方。
+判断标准也很清楚：<b>写出来的包必须先通过自检，否则不许交付</b>。</p>
+
+<p class="small">支持范围故意小，并且写进了工具说明与 worker 提示词：
+docx 只做标题/段落/列表/加粗；xlsx 只写单元格值；pptx 只做"一页标题 + 条目"。
+图片、图表、配色、动画、条件格式都属于版式判断，仍属"看着对"那一类，
+不塞进确定性流水线——<b>宁可说做不到，也不假装做到了</b>。</p>
+
+<div class="callout">
+  <div class="label">范围边界是设计的一部分，不是待办</div>
+  <p>流水线能覆盖的，是"内容对不对"；覆盖不了的，是"好不好看"。
+  把后者硬塞进来，只会让"验收通过"这句话重新变得不可信——
+  而那正是这套东西唯一值钱的地方。</p>
+</div>
+
+<h3>3.7　按写集后缀分类并记账</h3>
+
+<p>判断一个任务是代码还是文档，<strong>看 <code>writes</code> 的后缀就够了</strong>——
+它是任务必须精确声明的东西（写错会被 E013 拦），比让模型再判断一次既便宜又可靠。</p>
+
+<table>
+  <thead><tr><th style="width:20%">类型</th><th style="width:44%">后缀</th><th>处理</th></tr></thead>
+  <tbody>
+  <tr><td>代码</td><td><code>.py .ts .js .go .rs .sql .html …</code></td><td>现有路径</td></tr>
+  <tr><td>文档</td><td><code>.md .txt .rst .docx .pdf</code></td><td>现有路径 + 内容断言</td></tr>
+  <tr><td>表格 / 幻灯片</td><td><code>.xlsx .csv</code> / <code>.pptx</code></td><td>需要专门工具，未接则明确告警</td></tr>
+  </tbody>
+</table>
+
+<p>分类结果进 trace（<code>run.kinds</code>）与报告（"任务构成"），它回答一个绕不开的问题：
+<strong>我们跑过的活里，有多少是真能机械验收的</strong>。这个比例是"成功率"可信度的前提。</p>
+
+<h2>4　执行器接口</h2>
+
+<div class="callout">
+  <div class="label">实测前提（2026-11-08）</div>
+  <p>外层 Codex 单次命令上限 <strong>≥ 600 秒</strong>（实测跑满，用时 10 分 19 秒）。
+  所以轮询<strong>不必由 Codex 做</strong>——等待在脚本内部，Codex 只调一次。
+  这把"常驻宿主 + 消息投递"从必需品降为可选。</p>
+</div>
+
+<p>三个命令。<strong>默认同步阻塞</strong>，因为十秒到八分钟的批次占绝大多数。</p>
+
+<table>
+  <thead><tr><th style="width:40%">命令</th><th>行为</th></tr></thead>
+  <tbody>
+  <tr><td><code>orch dispatch --repo &lt;p&gt; "需求原话"<br>　[--budget 480]</code></td>
+      <td>规划 → 执行 → 验收 → 整合，<strong>阻塞直到完成</strong>，直接返回结论与产物清单。
+      <code>--budget</code> 是单次调用愿意等多久，到点未完成就返回进度与 <code>job_id</code></td></tr>
+  <tr><td><code>orch resume &lt;id&gt; [--budget 480]</code></td>
+      <td>接着等。用在超过单次预算的长批次，通常一到两次就够</td></tr>
+  <tr><td><code>orch undo &lt;id&gt;</code></td><td>撤销：删该 job 的分支与 worktree，回到起点</td></tr>
+  </tbody>
+</table>
+
+<p>状态落盘在 <code>runs/&lt;job_id&gt;/state.json</code>，<strong>不依赖常驻服务</strong>。
+命令被中断也不丢状态，<code>resume</code> 接着跑。</p>
+
+<h3>4.1　阻塞还是投递：按批次时长分档</h3>
+
+<p>两种模式不是二选一，是分档。<strong>默认阻塞</strong>，因为绝大多数批次在 8 分钟以内。</p>
+
+<ol>
+  <li><strong>预计 ≤ 8 分钟 → 阻塞。</strong>一次调用拿到结果，对话被占用但可接受。</li>
+  <li><strong>8–16 分钟 → 阻塞 + <code>resume</code>。</strong>两次调用，对话被占两轮。</li>
+  <li><strong>&gt; 16 分钟，或用户说要离开 → 投递。</strong>起宿主，跑完把报告投回原会话。</li>
+</ol>
+
+<p><strong>为什么投递必须靠宿主</strong>：这个环境里，任何依附于命令的进程都活不过命令本身
+（<code>DETACHED_PROCESS</code> 被 Job Object 清掉、<code>BREAKAWAY</code> 被拒、<code>schtasks</code> 在黑名单）。
+所以"命令秒回、任务继续跑"只能由对话之外启动的常驻进程承担。</p>
+
+<p><strong>档位不靠人猜，靠估。</strong>发起前先问一句 <code>orch eta --tasks N</code>：
+它取历史 trace 里"每层墙钟"的中位数，乘以层数，得出预计时长。
+超过 480 秒就转投递；宿主没启动则当场跑，并在输出里明说"可能被掐断"。
+有外部计划时 <code>dispatch</code> 自己就会做这件事，不用人记得。</p>
+
+<p class="small"><strong>宿主的启动方式</strong>：开机自启，装一次永久生效，<strong>不要求用户双击脚本</strong>。
+与"设环境变量"同属一次性安装配置。</p>
+
+<h3>4.2　卡死与回收</h3>
+
+<p><code>resume</code> 的前提是状态可信。如果状态文件损坏、或 worker 成了僵尸，<code>resume</code> 会一直失败，
+而进程仍占着内存和 worktree。<strong>没有回收机制，跑几次就会把机器拖死。</strong></p>
+
+<p><strong>判活靠文件锁 + 心跳，不靠 pid</strong>——pid 会被复用，拿它判活等于赌运气；
+而文件锁只能证明<strong>进程还活着</strong>，不能证明<strong>它在干活</strong>。两者要一起看。</p>
+
+<p>锁文件里除了状态，必须写 <code>pid</code>、<code>run_id</code>、<code>last_updated</code>（心跳）和 <code>progress</code>（当前阶段与完成数）。</p>
+
+<table>
+  <thead><tr><th style="width:16%">锁</th><th style="width:18%">心跳</th><th style="width:28%">结论</th><th>动作</th></tr></thead>
+  <tbody>
+  <tr><td>被持有</td><td>&lt; 30 分钟</td><td>真活着</td><td>不动</td></tr>
+  <tr><td>被持有</td><td><strong>&gt; 30 分钟</strong></td><td><strong>疑似挂起</strong>（进程在但没进展）</td><td>允许介入：需 <code>--force</code> 或人工确认后强杀</td></tr>
+  <tr><td><strong>可获取</strong></td><td>任意</td><td><strong>进程已死</strong>（正常结束或崩溃）</td><td>正常结束只清残留；异常标 <code>aborted</code> 并回收</td></tr>
+  </tbody>
+</table>
+
+<p>阈值<strong>默认 30 分钟，且不低于单任务超时的两倍</strong>（600 秒超时 → 至少 20 分钟），否则一次大上下文预填就会被误判成挂起。</p>
+
+<p class="small">心跳由 runner 的独立线程每 15 秒写一次——不能放在 worker 调用里，否则卡住时心跳也停。写入用「临时文件 + rename」。</p>
+
+<table>
+  <thead><tr><th style="width:30%">命令</th><th>行为</th></tr></thead>
+  <tbody>
+  <tr><td><code>orch status --all</code></td><td>列出所有 job：状态、锁是否被持有、占用多少 worktree 与磁盘</td></tr>
+  <tr><td><code>orch cleanup &lt;id&gt;</code></td><td>回收单个 job：删 worktree、分支，以及 <code>.orch/handoff/</code> 里该 run 的残留；<strong>保留</strong> <code>runs/&lt;id&gt;/</code> 下的 trace、diff、验收证据</td></tr>
+  <tr><td><code>orch cleanup --stale</code></td><td>批量回收「标记 running 但锁可获取」的 job</td></tr>
+  <tr><td><code>--force-kill</code></td><td>强杀：见下</td></tr>
+  </tbody>
+</table>
+
+<p><strong><code>--force-kill</code> 必须先校验再杀</strong>：按状态里的 pid 取出该进程的命令行，
+确认其中含本 run 的 id，通过才 <code>taskkill /T /F</code>；校验不过<strong>拒绝执行</strong>。
+否则 pid 复用时杀掉别人的进程，比不杀危险得多。</p>
+
+<p>它只有两个入口：<strong>心跳超时</strong>（锁仍被持有但 <code>last_updated</code> 超过阈值），
+或<strong>用户明确要求终止</strong>。前者要带 <code>--force</code>，后者要带 run id 确认。
+两种情况都记一条 <code>killed_by_force</code> 事件——事后统计"有多少次是被杀的"，比统计失败更有用。</p>
+
+<p class="small"><code>dispatch</code> 启动前自动跑一次 <code>cleanup --stale</code>：
+脏 job 不回收会越积越多，等到磁盘满了才发现就晚了。</p>
+
+<h2>5　安全网</h2>
+
+<p>自动批准意味着没人看，以下六条是硬要求。</p>
+
+<ol>
+  <li><strong>全绿才合并</strong>—— 本层任务<strong>全部</strong>成功才合并；部分失败停住等指令。</li>
+  <li><strong>交付要过两层</strong>—— 任务级全绿 <em>且</em> 集成级通过，才算交付；两者分开报。</li>
+  <li><strong>越界即废</strong>—— 改动不在 <code>writes</code> 内 → 作废该次尝试（已有）。</li>
+  <li><strong>合并只进集成分支</strong>—— 不动用户工作区，产物由 Codex 落地。</li>
+  <li><strong>可撤销</strong>—— <code>undo</code> 能完整撤掉分支、worktree 与临时文件。</li>
+  <li><strong>崩溃可回收</strong>—— 锁可获取却标记 running 的 job，能一键判死并清理（§4.2）。</li>
+</ol>
+
+<div class="callout">
+  <div class="label">为什么"全绿才合并"是必须的</div>
+  <p>现在的实现是"成功的照常合并、失败的不合并"。人工确认时这没问题，
+  自动批准时它会<strong>看起来像跑完了</strong>——这是"看起来成功"的第四种形式，
+  前三种都在验收器里，这一种在合并层。</p>
+</div>
+
+<h2>6　验收标准</h2>
+
+<p>四条硬指标，全过才算"能用"；过不了不许进大规模实验。</p>
+
+<table>
+  <thead><tr><th style="width:8%">#</th><th style="width:40%">指标</th><th>判定</th></tr></thead>
+  <tbody>
+  <tr><td>1</td><td>一次批处理，Codex 调用次数 ≤ 2</td><td>用日志统计，从"用户发消息"到"结果回到聊天"</td></tr>
+  <tr><td>2</td><td>10 份文档无人值守完成，失败可归因</td><td>每份失败必须给出错误码或一句原因，不能是"未知"</td></tr>
+  <tr><td>3</td><td>任意一次 run 可完整撤销</td><td><code>undo</code> 后仓库回到起点，分支与 worktree 清空</td></tr>
+  <tr><td>4</td><td>自干率可解释</td><td>抽 10 次自干，互动类型与位置数均符合 §3.1，且有记账；自干率本身不作指标，只作观测</td></tr>
+  </tbody>
+</table>
+
+<h2>7　不做什么（划边界）</h2>
+
+<p>冻结的一部分是"明确不碰"，否则范围会一直膨胀。</p>
+
+<ul>
+  <li><strong>不做 GUI</strong>——界面就是 Codex 窗口。</li>
+  <li><strong>不做模型路由矩阵</strong>。worker 固定便宜档位——“按任务类型选模型”已被实验证伪。</li>
+  <li><strong>不做多租户 / 权限体系</strong>。单人本机工具。</li>
+  <li><strong>不做自动探索仓库</strong>。planner 只看用户给的东西。</li>
+  <li><strong>冻结前不跑大规模实验</strong>——版本不固定，结论不可比。</li>
+</ul>
+
+<h2>8　冻结意味着什么</h2>
+
+<p>冻结之后，接口、字段、规则编号、验收标准都不再变。改任何一条，都要：</p>
+
+<ol>
+  <li>记录"为什么上一版不够用"；</li>
+  <li>重跑验收标准四条；</li>
+  <li>重跑受影响的那批实验（不是重跑全部）。</li>
+</ol>
+
+<p>冻结的是<strong>接口与验收标准</strong>，不是性能承诺。同样的输入，慢一点可以；
+判据松一格不可以——那是这套东西唯一值钱的地方。</p>
+
+<h3>8.1　封存与复现</h3>
+
+<table>
+  <thead><tr><th style="width:22%">项</th><th>值</th></tr></thead>
+  <tbody>
+  <tr><td>版本</td><td><code>tag v1.9</code>（提交见 <code>git log -1</code>）</td></tr>
+  <tr><td>离线包</td><td><code>dist/orch-v1.9.bundle</code>（单个文件，不依赖网络）</td></tr>
+  <tr><td>校验</td><td><code>dist/SHA256SUMS.txt</code></td></tr>
+  <tr><td>运行时</td><td>Python 3.13 · <b>纯标准库，无第三方依赖</b></td></tr>
+  <tr><td>外部程序</td><td>git 2.x；worker 需要 <code>codex</code> CLI（本机核验 0.167.0-alpha.3.2）</td></tr>
+  <tr><td>测试</td><td>337 个，约 8 分钟（大部分是真 git 操作，不是 mock）</td></tr>
+  </tbody>
+</table>
+
+<p>换一台机器，三步：</p>
+
+<ol>
+  <li><code>git clone dist/orch-v1.9.bundle orch &amp;&amp; cd orch &amp;&amp; git checkout v1.9</code></li>
+  <li><code>python -m unittest discover -s tests -t .</code> → 应输出 <code>Ran 337 tests ... OK</code></li>
+  <li><code>python -m orch --help</code> → 应看到 15 个子命令</li>
+</ol>
+
+<p class="small">不需要装任何包、不需要配数据库、不需要联网。worker 那一步才需要模型凭据，
+而且它的失败会被明确报出来（缺 key、缺 git 身份、沙箱起不来），不会伪装成"模型做错了"。</p>
+
+<p>这样大规模实验的结论才对得上号——<strong>数据是某个具体版本的属性，不是一个想法的属性</strong>。</p>
+
+<h2>版本记录</h2>
+
+<table>
+  <thead><tr><th style="width:10%">版本</th><th style="width:38%">改了什么</th><th>为什么</th></tr></thead>
+  <tbody>
+  <tr><td>v1.0</td><td>初稿：三段用户旅程、skill 骨架、契约三个字段、四条安全网</td><td>把技术验证的结论固化成可实现的规格</td></tr>
+  <tr><td>v1.1</td><td>新增 §3.3 自干通道</td><td>不是所有活都值得走编排，Codex 需要拒绝权</td></tr>
+  <tr><td>v1.2</td><td>自干判据改为「互动类型 × 位置数」，删掉行数</td><td>行数是伪精确：改 5 行跨 3 个文件，比改 40 行同一函数更险</td></tr>
+  <tr><td>v1.3</td><td>执行器改为同步阻塞；删掉 Codex 侧轮询；宿主降为可选</td><td>实测外层命令上限 ≥ 600 秒，等待可以整个放进脚本</td></tr>
+  <tr><td>v1.4</td><td>验收分两层（任务级 / 集成级）；阻塞与投递按时长分档</td><td>各自通过不等于组合可用；投递通道已实测可用，宿主改为长批次专用</td></tr>
+  <tr><td>v1.5</td><td>handoff 超限转引用形态；新增 cleanup / force-kill</td><td>200 字装不下几十页结构，压缩会丢决策理由；崩溃后没有回收会拖死机器</td></tr>
+  <tr><td>v1.6</td><td>锁加心跳，超阈值允许强杀；cleanup 覆盖 handoff 残留</td><td>文件锁只能证明进程活着，证明不了它在干活</td></tr>
+  <tr><td>v1.7</td><td>规划分为初版（Codex）/ 校验（规则）/ 修补（DeepSeek），修补不得放宽标准</td><td>强模型只该用在"理解"，机械改写交给便宜模型；否则重写循环会把额度吃掉</td></tr>
+  <tr><td>v1.8</td><td>执行单元拆成壳/模型/工具三层；新增任务入选标准（可断言性）与按后缀分类记账</td><td>办公任务的瓶颈是缺确定性工具，不是缺更聪明的壳；弱判据会污染实验因变量</td></tr>
+  <tr><td>v1.9</td><td>docx / xlsx / pptx 三种格式的生成与断言全部落地，生成时自检包结构。<b>本版封存</b></td><td>只有断言没有生成，文档任务是半条腿；而"生成成功"必须意味着"包是完整的"</td></tr>
+  </tbody>
+</table>
+
+<p class="small">每一版的改动都必须能回答"上一版哪里不够用"。答不上来的改动，不进冻结稿。</p>
+
+</body>
+</html>

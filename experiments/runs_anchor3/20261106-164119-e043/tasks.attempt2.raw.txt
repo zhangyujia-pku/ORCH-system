@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务列表导出\n## 要实现\n按此前已定方案，将任务列表导出为表格文件。\n实施前核实仓库中的既有导出约定；不重新决定导出入口、文件格式或列名顺序。\n完成后在 README.md 说明修改位置与行为变化。\n## 不能改\n其它接口的行为保持不变。\n不修改 cli.py、storage.py 与 app.py 中无关的功能。\n不修改运行期数据文件 tasks.json。\n## 已定的技术决策\n沿用现有 Python 项目结构与存储方式。\n导出方案沿用此前约定；若仓库中无法核实该约定，先确认缺失信息，不自行替换方案。\n",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表表格导出",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 含导出入口、文件格式、列名顺序、空任务列表的断言。",
+        "文件断言：README.md 含已核实的导出入口、文件格式、列名及顺序、修改文件、行为变化的说明。",
+        "命令 `python -c \"import subprocess; allowed={'storage.py','app.py','tests/test_app.py','README.md'}; paths=subprocess.check_output(['git','diff','--name-only','HEAD'],text=True).splitlines(); assert set(paths) <= allowed, paths\"` 退出码等于 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "tests/test_cli.py",
+        ".gitignore",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "导出入口、文件格式、列名及顺序沿用此前已定方案，实施前从仓库核实。",
+        "其它接口的行为保持原样。",
+        "不改动任务列表导出以外的部分。",
+        "完成后说明修改位置，由用户再次运行测试确认。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

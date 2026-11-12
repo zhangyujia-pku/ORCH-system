@@ -1,0 +1,26 @@
+```json
+{
+  "spec_md": "# 任务统计\n## 要实现\n在 storage.py 中新增 stats()，返回任务总数与 done 为真的任务数，格式为 {\"total\": 总数, \"done\": 已完成数}。\n让 app.py 的任务统计入口直接返回 storage.stats() 的结果。\n覆盖空集合、混合完成状态和全部完成的情况。\n## 不能改\n不修改 cli.py、任务存储格式、运行期数据文件或无关接口。\n## 已定的技术决策\n沿用现有任务读取方式与应用框架，不新增依赖。\n统计逻辑集中在 storage.py，app.py 仅委托调用。\n实现与调用存在顺序依赖，合为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务统计直通功能",
+      "reads": ["storage.py", "app.py", "tests/test_app.py", "requirements.txt"],
+      "writes": ["storage.py", "app.py", "tests/test_app.py"],
+      "acceptance": [
+        "文件断言：storage.py 定义无参数 stats()，使用现有任务读取方式，返回仅含 total、done 两个整数键的字典。",
+        "文件断言：app.py 的任务统计入口直接返回 storage.stats() 的结果，不重复计算统计值。",
+        "文件断言：tests/test_app.py 包含 stats() 的空集合、混合完成状态、全部完成用例，预期结果分别为 {\"total\": 0, \"done\": 0}、{\"total\": 3, \"done\": 1}、{\"total\": 2, \"done\": 2}。",
+        "文件断言：tests/test_app.py 包含委托调用测试，将 storage.stats() 替换为返回固定字典的桩，断言应用统计入口返回该字典。",
+        "python -m pytest -q 退出码为 0"
+      ],
+      "forbidden": ["cli.py", "tasks.json", "requirements.txt"],
+      "context_refs": [
+        "统计结果格式固定为 {\"total\": 总数, \"done\": 已完成数}",
+        "沿用现有任务读取方式与应用框架，不新增依赖",
+        "统计逻辑集中在 storage.py，app.py 直接返回其结果"
+      ]
+    }
+  ]
+}
+```

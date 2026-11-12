@@ -1,0 +1,47 @@
+```json
+{
+  "spec_md": "# 任务数据文件持久化\n## 要实现什么\n让任务数据写入文件，新进程启动后能重新读取已保存的数据。\n检查 storage.py 与 app.py 的现有数据流，仅修改持久化所需的部分。\n补充覆盖跨进程读取的回归测试。\n完成后说明实际修改的文件与行为，供用户复跑测试。\n## 不能改什么\n保持其它接口的输入、输出、状态码与既有行为不变。\n不修改 cli.py、requirements.txt 或无关功能。\n不将运行期数据文件、缓存或日志纳入源码修改。\n## 已定的技术决策\n采用文件持久化，沿用仓库现有的数据结构、文件路径约定与序列化方式。\n不引入数据库或新增依赖。\n持久化写入与启动加载属于同一数据流，合为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据的文件持久化",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "requirements.txt",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "运行 `python -m pytest -q tests/test_app.py tests/test_cli.py`，退出码为 0。",
+        "文件断言：tests/test_app.py 包含使用临时数据路径的持久化测试，通过独立 Python 子进程保存任务，再通过另一个独立 Python 子进程读取，断言任务字段与保存值一致。",
+        "文件断言：tests/test_app.py 包含任务修改与删除的持久化测试，每次操作后由独立 Python 子进程重新读取，断言修改值已保存且被删除的任务不存在。",
+        "运行 `git diff --name-only -- cli.py requirements.txt README.md .gitignore tests/test_cli.py`，标准输出为空。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        ".gitignore",
+        "tests/test_cli.py",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "任务数据采用文件持久化，进程重启后重新读取。",
+        "沿用现有数据结构、文件路径约定与序列化方式，不引入数据库或新增依赖。",
+        "保持其它接口行为不变，仅修改持久化所需的数据流。",
+        "完成后向用户说明实际修改的文件与行为。"
+      ]
+    }
+  ]
+}
+```

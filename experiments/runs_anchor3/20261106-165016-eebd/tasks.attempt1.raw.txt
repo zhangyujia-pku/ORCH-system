@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务优先级\n## 要实现什么\n为任务增加优先级，在任务列表读取时按优先级排序。\n兼容没有优先级字段的历史任务；相同优先级保持原有相对顺序。\n完成后说明具体修改位置与验证结果，供用户复测。\n## 不能改什么\n限制修改范围为 storage.py、app.py 及对应测试。\n保持其它接口的参数、响应结构、状态码与业务行为不变，优先级新增字段和列表排序除外。\n不修改 cli.py、依赖配置或运行期数据文件。\n## 已定的技术决策\n沿用现有存储方式和应用架构，不引入新依赖。\n优先级取值、默认值和排序方向沿用仓库中已有的明确约定。\n当前输入未提供此前讨论的具体优先级规则；若仓库也无明确约定，实施前须补齐该信息，不擅自替换既定决策。\n该改动涉及存储、接口与回归验证的顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级支持",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "requirements.txt",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 和 app.py 的优先级取值、缺省处理和排序方向符合仓库已有明确约定；若约定缺失，实施记录明确列出待补齐规则。",
+        "文件断言：tests/test_app.py 包含优先级持久化往返、不同优先级排序、同优先级稳定排序、历史任务缺失优先级字段的测试，各测试包含明确的结果断言。",
+        "文件断言：tests/test_app.py 保留已有测试，新增回归断言覆盖不传优先级时的原有接口行为。",
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。",
+        "命令 `git diff --name-only -- . ':!storage.py' ':!app.py' ':!tests/test_app.py'` 输出为空。",
+        "文件断言：最终交付说明列出修改文件、优先级规则和实际执行的测试结果。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "README.md",
+        "tests/test_cli.py",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用此前确定且可从仓库确认的优先级规则，缺失规则需补齐后实施。",
+        "存储、接口和测试作为一个完整改动交付。",
+        "其它接口行为保持不变，不引入新依赖，不提交运行期数据。"
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,27 @@
+{
+  "status": "fallback",
+  "reason": "计划在 3 次尝试内未通过校验，降级为单 agent 直接执行",
+  "attempts": [
+    {
+      "n": 1,
+      "codes": [
+        "E014"
+      ],
+      "parse_error": null
+    },
+    {
+      "n": 2,
+      "codes": [
+        "E014"
+      ],
+      "parse_error": null
+    },
+    {
+      "n": 3,
+      "codes": [
+        "E014"
+      ],
+      "parse_error": null
+    }
+  ]
+}

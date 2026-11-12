@@ -1,0 +1,43 @@
+```json
+{
+  "spec_md": "# 创建任务时校验标题\n## 要实现\n在创建任务的数据写入前拒绝空标题，覆盖空字符串和仅含空白字符的标题。\n非空标题仍按现有逻辑创建，不额外修改标题内容。\n完成后汇报实际修改的文件和校验位置，供用户复跑测试。\n## 不能改\n不改变其它接口的行为，不修改 CLI、依赖或运行期数据文件。\n不进行无关重构，不引入新的存储格式。\n## 已定的技术决策\n沿用现有技术栈和错误处理约定，在 app.py 与 storage.py 的现有创建调用链中确定必要的校验位置。\n需求属于同一创建调用链的局部改动，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "落实创建任务的空标题校验",
+      "reads": [
+        "app.py",
+        "storage.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "requirements.txt"
+      ],
+      "writes": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：创建任务调用链在写入数据前拒绝空字符串标题和仅含空白字符的标题，错误处理沿用现有约定。",
+        "文件断言：tests/test_app.py 包含空字符串标题、纯空白标题被拒绝且不新增任务的测试，以及非空标题成功创建且内容保持原样的测试。",
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。",
+        "文件断言：app.py 与 storage.py 的改动仅涉及创建任务的标题校验，其它接口的实现保持不变。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "README.md",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "仅补充创建任务时的空标题校验，不重新设计任务数据处理。",
+        "沿用现有错误处理约定，其它接口行为保持不变。",
+        "完成后汇报修改位置和测试结果，由用户再次运行测试确认。"
+      ]
+    }
+  ]
+}
+```

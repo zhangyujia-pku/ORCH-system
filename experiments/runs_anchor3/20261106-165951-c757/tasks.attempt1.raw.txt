@@ -1,0 +1,42 @@
+```json
+{
+  "spec_md": "# 创建任务时校验标题\n## 要实现\n在 storage.py 的任务创建入口拒绝空字符串标题和仅含空白字符的标题。\n校验失败时不得写入任务数据。\n补充回归测试，完成后说明实际修改的文件和内容，供用户复测。\n## 不能改\n其它接口的行为保持原样。\n不修改 app.py、cli.py、requirements.txt 或运行期数据文件。\n不进行重构、统一错误处理或其它无关改动。\n## 已定的技术决策\n沿用现有存储实现和错误处理约定。\n有效标题按原值保存，不因校验而裁剪空白。\n该改动范围集中，作为一个任务交付，不拆分。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现创建任务的非空标题校验",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 的创建入口在任何持久化写入前校验标题，拒绝空字符串和仅含空白字符的标题，沿用现有错误处理约定。",
+        "文件断言：tests/test_app.py 包含直接调用存储创建入口的回归测试，覆盖空字符串、纯空白标题被拒绝，失败后存储内容不变，以及有效标题含首尾空白时按原值保存；测试使用临时存储。",
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。",
+        "文件断言：相对于 `git show HEAD:storage.py`，storage.py 的差异仅涉及创建入口的标题校验，其它接口实现未变。",
+        "文件断言：交付说明列出 storage.py 和 tests/test_app.py 的实际修改内容及测试结果。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "仅增加任务创建时的标题非空校验，其它接口行为保持原样。",
+        "沿用现有存储实现和错误处理约定。",
+        "有效标题按原值保存，不裁剪空白。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

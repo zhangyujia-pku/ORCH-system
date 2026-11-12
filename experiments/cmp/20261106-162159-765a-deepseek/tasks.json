@@ -1,0 +1,38 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据文件持久化",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py::test_storage_persists_tasks_after_restart` 退出码为 0；该测试使用临时文件，保存任务后重新初始化存储，断言重新读取的任务数据与保存的数据相等。",
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "采用文件持久化，重启后加载已保存的任务数据。",
+        "保持现有接口行为不变，不引入数据库或新依赖。",
+        "交付时说明修改的文件和内容。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

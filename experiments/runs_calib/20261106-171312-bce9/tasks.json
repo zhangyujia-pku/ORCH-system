@@ -1,0 +1,37 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务标题关键词搜索",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 含可调用函数 search(keyword)，返回值等于现有任务中标题包含 keyword 的任务列表。",
+        "文件断言：app.py 含路径为 /tasks/search、HTTP 方法含 GET 的路由；该路由从查询参数 keyword 获取关键词，调用 storage.search(keyword)，返回值结构等于 GET /tasks 的任务列表响应结构。",
+        "文件断言：tests/test_app.py 含搜索命中、搜索无匹配、搜索结果响应结构的测试用例。",
+        "python -m pytest -q tests/test_app.py 退出码 0"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用现有存储方式与任务列表响应结构",
+        "search(keyword) 按标题包含关键词筛选任务",
+        "GET /tasks/search 使用查询参数 keyword"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

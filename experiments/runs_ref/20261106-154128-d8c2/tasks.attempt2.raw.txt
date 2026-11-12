@@ -1,0 +1,35 @@
+```json
+{
+  "spec_md": "# 任务软删除\n## 要实现\n将 storage.py 的 delete 改为软删除：保留记录并设置 deleted 标记，默认列表排除已删除记录。\n兼容缺少 deleted 字段的现有记录，将其视为未删除。\n## 不能改\n不修改 app.py、cli.py、现有测试及运行期数据文件 tasks.json。\n## 已定的技术决策\n使用 deleted 布尔字段标记删除状态。\n保留现有公开函数签名。\n本次改动集中在 storage.py，不拆分任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "reads": [
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 的 delete 对存在记录执行删除后，持久化记录仍包含该记录，且该记录的 deleted 字段等于 true。",
+        "文件断言：storage.py 的默认列表函数返回值不含 deleted 为 true 的记录，且包含缺少 deleted 字段的记录。",
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码为 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "tests/**",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "使用 deleted 布尔字段标记删除状态。",
+        "缺少 deleted 字段的记录视为未删除。",
+        "保留现有公开函数签名。"
+      ]
+    }
+  ]
+}
+```

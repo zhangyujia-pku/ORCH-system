@@ -1,0 +1,48 @@
+```json
+{
+  "spec_md": "# 任务数量统计\n## 要实现\n在 storage.py 中统计任务总数与已完成数量，由 app.py 提供统计结果。\n覆盖空任务列表、全部未完成、部分完成、全部完成的情况。\n完成后说明修改位置与验证结果，供用户复测。\n## 不能改\n其它接口的行为、任务数据格式、CLI 行为和依赖保持不变。\n不修改运行期数据 tasks.json。\n## 已定的技术决策\n沿用现有存储方式和任务完成状态定义。\n统计逻辑集中在 storage.py，app.py 复用该逻辑。\n仅一个任务交付，避免拆分存在顺序依赖的实现与测试。\n现有上下文未提供此前讨论的函数名、路由或响应字段，实施时优先沿用仓库已有约定。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数量统计",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md",
+        "requirements.txt"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "执行 `python -m pytest -q tests/test_app.py tests/test_cli.py`，退出码为 0。",
+        "文件断言：tests/test_app.py 包含通过 app.py 统计入口验证的四种场景，任务总数与已完成数量分别断言为 (0, 0)、(3, 0)、(3, 2)、(3, 3)。",
+        "文件断言：tests/test_app.py 中新增统计测试使用隔离的临时存储，不读写仓库中的 tasks.json。",
+        "文件断言：storage.py 包含统计实现，app.py 调用该实现，不重复实现统计逻辑。",
+        "文件断言：README.md 记录统计入口、返回字段、修改文件和复测命令。",
+        "执行 `git diff --name-only HEAD`，输出路径仅允许包含 storage.py、app.py、tests/test_app.py、README.md。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "tests/test_cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "仅增加任务总数和已完成数量统计。",
+        "沿用现有存储方式与完成状态定义。",
+        "保持其它接口行为、CLI 行为及任务数据格式不变。"
+      ]
+    }
+  ]
+}
+```

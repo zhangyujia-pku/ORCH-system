@@ -1,0 +1,39 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据的文件持久化",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码 0。",
+        "文件断言：storage.py 含任务数据写入文件的调用，含从文件读取任务数据的调用。",
+        "命令 `git diff --name-only` 的输出仅含 storage.py。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        ".gitignore",
+        "tests/**"
+      ],
+      "context_refs": [
+        "任务数据保存到文件，重启后恢复。",
+        "保持现有接口行为不变。",
+        "只修改 storage.py，完成后说明改动与验证结果。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

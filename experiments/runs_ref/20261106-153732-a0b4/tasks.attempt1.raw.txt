@@ -1,0 +1,40 @@
+```json
+{
+  "spec_md": "# 导出任务 CSV\n## 要实现\n在 app.py 新增 GET /tasks/export，调用 storage.py 现有读取接口获取任务列表，返回 CSV。\n输出三列：任务 ID、标题、完成状态；表头沿用现有任务结构中对应的字段名。\n保持存储返回的任务顺序；空列表仍输出表头。\n## 不能改\n不得修改 storage.py、cli.py、依赖文件或运行期数据文件。\n不得改变现有 HTTP 路由的行为。\n## 已定的技术决策\n沿用现有 Web 框架和存储接口。\n使用 Python 标准库 csv 生成 CSV，正确转义逗号、双引号和换行。\n响应使用 UTF-8，Content-Type 为 text/csv，可包含 charset 参数。\n本需求为单一路由改动，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务 CSV 导出路由",
+      "reads": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py 退出码为 0。",
+        "文件断言：tests/test_app.py 包含 GET /tasks/export 的测试，断言状态码为 200、Content-Type 主类型为 text/csv、响应可按 UTF-8 解码。",
+        "文件断言：导出测试通过现有存储接口提供至少两条任务，使用 csv.reader 解析响应，断言表头依次为现有任务结构中 ID、标题、完成状态的字段名，每行恰有三列，内容和顺序与提供的任务一致。",
+        "文件断言：导出测试覆盖含中文、逗号、双引号和换行的标题，断言 csv.reader 解析后的标题与输入完全一致。",
+        "文件断言：导出测试覆盖空任务列表，断言 csv.reader 解析结果仅含三列表头。",
+        "文件断言：app.py 的导出路由调用 storage.py 的现有读取接口，不直接读取或写入 tasks.json。"
+      ],
+      "forbidden": [
+        "storage.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "仅新增 GET /tasks/export，保留现有路由行为。",
+        "三列依次为任务 ID、标题、完成状态，表头沿用实际存储字段名。",
+        "使用标准库 csv 和现有存储读取接口，不新增依赖。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

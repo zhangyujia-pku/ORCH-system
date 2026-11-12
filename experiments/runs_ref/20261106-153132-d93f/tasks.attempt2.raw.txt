@@ -1,0 +1,41 @@
+```json
+{
+  "spec_md": "# 任务存储持久化\n## 要实现\n在 storage.py 中增加 _save()，将全部任务序列化写入同目录的 tasks.json。\n每次成功写操作完成内存更新后调用 _save()，读取操作不触发保存。\n## 不能改\n不修改 storage.py 之外的源码、测试或文档。\n不将运行期生成的 tasks.json 列入写集。\n## 已定的技术决策\n使用 Python 标准库 json。\n保存路径基于 storage.py 所在目录计算，不依赖当前工作目录。\n保留现有公开接口与内存数据结构。\n本需求为单模块内的关联改动，不拆分任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务存储持久化",
+      "reads": [
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 含模块级函数定义 `def _save()`，其函数体含 json.dump 或 json.dumps 调用，序列化参数等于当前全部任务集合。",
+        "文件断言：storage.py 中保存目标路径等于 `Path(__file__).resolve().parent / 'tasks.json'` 或 `os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.json')`。",
+        "文件断言：storage.py 中每个成功改变任务集合或任务内容的执行分支，在最后一次内存更新之后、返回之前含 `_save()` 调用。",
+        "文件断言：storage.py 中所有读取操作的函数体均不含 `_save()` 调用。",
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "README.md",
+        "requirements.txt",
+        ".gitignore",
+        "tests/**"
+      ],
+      "context_refs": [
+        "使用 Python 标准库 json 序列化全部任务。",
+        "tasks.json 位于 storage.py 所在目录，保存路径不依赖当前工作目录。",
+        "成功写操作在内存更新后调用 _save()，读取操作不触发保存。",
+        "保留现有公开接口与内存数据结构。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

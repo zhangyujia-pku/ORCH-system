@@ -1,0 +1,26 @@
+diff --git a/storage.py b/storage.py
+index e88bd7c..979fba5 100644
+--- a/storage.py
++++ b/storage.py
+@@ -11,7 +11,7 @@ def reset():
+ 
+ 
+ def list_all():
+-    return list(TASKS.values())
++    return sorted(TASKS.values(), key=lambda t: t["id"], reverse=True)
+ 
+ 
+ def get(task_id):
+diff --git a/tests/test_app.py b/tests/test_app.py
+index e61f00f..79a5f4c 100644
+--- a/tests/test_app.py
++++ b/tests/test_app.py
+@@ -27,3 +27,8 @@ def test_create_task(client):
+ 
+ def test_create_requires_title(client):
+     assert client.post("/tasks", json={}).status_code == 400
++
++def test_list_all_descending_order():
++    storage.create("first")
++    storage.create("second")
++    assert [t["id"] for t in storage.list_all()] == [2, 1]

@@ -1,0 +1,47 @@
+```json
+{
+  "spec_md": "# 任务关键词筛选\n## 要实现什么\n在现有任务查询入口增加可选的关键词筛选，返回文本包含关键词的任务。\n未提供关键词或关键词为空时，保持现有查询行为。\n补充回归测试，在 README.md 中说明用法、匹配规则和修改位置。\n## 不能改什么\n不修改无关功能、其它接口的行为、任务数据结构或持久化格式。\n不修改 tasks.json、缓存文件或依赖配置。\n## 已定的技术决策\n沿用现有 Python 项目结构和测试框架，不引入新依赖。\n优先沿用仓库已有的关键词匹配约定；当前输入未提供此前讨论的具体规则，不将其视为已知决策。\n本需求是单一功能，入口、实现和回归测试存在顺序依赖，合并为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词筛选",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md",
+        "requirements.txt"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 中存在关键词筛选测试，使用明确的任务文本和期望结果，覆盖部分匹配、多条匹配、无匹配、未提供关键词和空关键词。",
+        "文件断言：新增测试断言未提供关键词和空关键词时返回全部符合原查询条件的任务。",
+        "文件断言：README.md 包含可直接执行的关键词筛选示例、实际匹配字段、大小写处理规则和修改文件说明。",
+        "命令 git diff --name-only 的输出仅包含 app.py、cli.py、storage.py、tests/test_app.py、tests/test_cli.py、README.md 中的文件。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "仅实现关键词筛选，保持其它接口行为。",
+        "沿用现有结构、任务数据格式和依赖。",
+        "优先继承仓库已有匹配约定；README.md 必须明确最终采用的规则。"
+      ]
+    }
+  ]
+}
+```

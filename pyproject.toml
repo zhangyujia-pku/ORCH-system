@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orch-agents"
+version = "1.9.4"
+description = "多 Agent 编排引擎：任务契约、静态校验、隔离执行、确定性验收"
+requires-python = ">=3.10"
+dependencies = []
+
+# 不提供独立 wheel / pip 安装：运行时需要仓库根下的 workers.json、
+# config/prices.json、config/baseline.json、skill/、examples/，它们都在 orch 包之外。
+# 源码目录安装请用：python scripts/install_cli.py
+
+[tool.setuptools]
+packages = ["orch"]

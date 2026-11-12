@@ -1,0 +1,14 @@
+{
+  "id": "r2short",
+  "tier": "S",
+  "goal": "在 src 下 4 个计算引擎模块（engine_orders.py、engine_billing.py、engine_refund.py、engine_ship.py）里补齐三个未实现的规则函数：round_step（按本模块 STEP 取整，四舍五入、恰好中点时取远离零的一侧）、tier_discount（命中不高于金额的最高档，按 bps 打折后向下取整）、allocate（按权重分摊总额，余数按小数部分从大到小补齐、平局取下标小的）。每个模块一个文件、常量各不相同，互不依赖，可以并行改。验收：依次跑 python checks/check_orders.py、check_billing.py、check_refund.py、check_ship.py，全部退出码 0。",
+  "timeout_s": 1800,
+  "accept": [
+    "python checks/check_orders.py",
+    "python checks/check_billing.py",
+    "python checks/check_refund.py",
+    "python checks/check_ship.py"
+  ],
+  "batch_size": 4,
+  "kind": "四个短单元（只改规模）"
+}

@@ -1,0 +1,7 @@
+{"event": "run.start", "ts": "2026-11-07T11:29:50+08:00", "session": 1, "data": {"run_id": "m1-response-id-r1-codex-ds-flash", "base": "681a24282058500003ac672f0ef807c22ae3f146", "n_tasks": 1, "layers": [["t01"]], "max_agents": 1, "worker": "codex-ds-flash", "verifier": "codex-openai"}}
+{"event": "layer.start", "ts": "2026-11-07T11:29:50+08:00", "session": 1, "data": {"layer": 0, "tasks": ["t01"]}}
+{"event": "task.start", "ts": "2026-11-07T11:29:51+08:00", "session": 1, "data": {"task_id": "t01", "branch": "orch/m1-response-id-r1-codex-ds-flash/t01-a1", "worktree": "<HOME>\\WorkBuddy\\agent协同项目\\orchestrator\\experiments\\cmp\\m1-response-id-r1-codex-ds-flash\\wt\\t01-a1", "provider": "codex-ds-flash"}}
+{"event": "task.committed", "ts": "2026-11-07T11:31:28+08:00", "session": 1, "data": {"task_id": "t01", "changed": ["app.py", "tests/test_app.py"]}}
+{"event": "task.verify", "ts": "2026-11-07T11:31:31+08:00", "session": 1, "data": {"task_id": "t01", "ok": true, "failed": []}}
+{"event": "merge.result", "ts": "2026-11-07T11:31:32+08:00", "session": 1, "data": {"target": "orch/run-m1-response-id-r1-codex-ds-flash", "results": [{"branch": "orch/m1-response-id-r1-codex-ds-flash/t01-a1", "ok": true, "detail": ""}]}}
+{"event": "run.end", "ts": "2026-11-07T11:31:32+08:00", "session": 1, "data": {"ok": true, "done": 1, "total": 1, "merged": "orch/run-m1-response-id-r1-codex-ds-flash"}}

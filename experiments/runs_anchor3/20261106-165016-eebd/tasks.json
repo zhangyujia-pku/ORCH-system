@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级支持",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "文件断言：tests/test_app.py 中存在 test_priority_round_trip、test_priority_sort_order、test_legacy_task_default_priority 三个测试函数，分别断言优先级保存后读取一致、任务按已定优先级规则排序、缺少优先级字段的旧任务使用已定默认值。",
+        "运行 python -m pytest -q tests/test_app.py tests/test_cli.py，退出码为 0。",
+        "文件断言：README.md 中存在标题 `## 本次修改`、`## 优先级规则`、`## 测试结果`；`## 本次修改` 下列出 storage.py、app.py、tests/test_app.py；`## 测试结果` 下包含实际执行的 `python -m pytest -q tests/test_app.py tests/test_cli.py` 命令与数字退出码。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用此前确定的优先级取值、默认值与排序方向。",
+        "其它接口的既有行为保持不变。",
+        "沿用现有 Python 实现与数据存储方式。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+```json
+{
+  "spec_md": "# 请求访问记录\n## 要实现\n在 app.py 中增加请求钩子，记录每个请求的路径和最终响应状态码。\n覆盖正常响应、404 响应和应用返回的错误响应。\n## 不能改\n不改变现有路由、响应内容、状态码或存储行为。\n不修改 cli.py、storage.py、requirements.txt 或运行期数据文件。\n## 已定技术决策\n沿用 app.py 现有框架的响应钩子和日志机制，不增加依赖。\n日志由 app.py 产生，每个请求记录一次，包含路径和状态码。\n该改动及其回归测试作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "添加请求访问日志",
+      "reads": ["app.py", "tests/test_app.py"],
+      "writes": ["app.py", "tests/test_app.py"],
+      "acceptance": [
+        "文件断言：app.py 注册响应钩子，通过日志机制记录请求路径和最终响应状态码，返回原响应。",
+        "文件断言：tests/test_app.py 包含日志捕获测试，分别验证正常请求、未知路径的 404 响应和错误响应；每个请求恰好产生一条访问记录，记录包含对应路径和实际响应状态码。",
+        "`python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。"
+      ],
+      "forbidden": ["cli.py", "storage.py", "requirements.txt", "tasks.json"],
+      "context_refs": [
+        "沿用现有框架的响应钩子和日志机制，不增加依赖。",
+        "保留现有路由、响应内容、状态码和存储行为。"
+      ]
+    }
+  ]
+}
+```

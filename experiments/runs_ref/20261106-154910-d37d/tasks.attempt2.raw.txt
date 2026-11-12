@@ -1,0 +1,26 @@
+```json
+{
+  "spec_md": "# 任务列表分页\n## 要实现\n为 GET /tasks 增加 limit 和 offset 查询参数，在返回前对任务列表切片。\n未提供分页参数时返回全部任务，offset 默认为 0。\n## 不能改\n不修改存储格式、CLI 或其他接口的行为。\n不修改运行期数据文件 tasks.json。\n## 已定技术决策\n沿用现有框架与响应结构，使用列表切片实现分页。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表切片分页",
+      "reads": ["app.py", "storage.py", "tests/test_app.py"],
+      "writes": ["app.py", "tests/test_app.py"],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py 退出码等于 0。",
+        "文件断言：tests/test_app.py 含测试，使用按顺序排列的 5 条任务请求 GET /tasks?limit=2&offset=1，断言返回的任务列表等于原列表的第 2、3 条。",
+        "文件断言：tests/test_app.py 含测试，断言未提供分页参数时返回全部 5 条任务。",
+        "文件断言：tests/test_app.py 含测试，断言 offset 超出任务总数时返回的任务列表等于空列表。"
+      ],
+      "forbidden": ["storage.py", "cli.py", "tasks.json"],
+      "context_refs": [
+        "沿用现有框架与响应结构。",
+        "使用列表切片实现分页。",
+        "未提供 limit 时不限制返回数量，offset 默认为 0。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

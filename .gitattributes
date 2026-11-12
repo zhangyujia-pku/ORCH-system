@@ -1,0 +1,8 @@
+# 统一换行符：源码与文档入库用 LF，二进制原样存
+* text=auto eol=lf
+*.pdf binary
+*.png binary
+*.jpg binary
+*.docx binary
+*.xlsx binary
+*.zip binary

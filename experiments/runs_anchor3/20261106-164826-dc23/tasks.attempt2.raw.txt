@@ -1,0 +1,41 @@
+```json
+{
+  "spec_md": "# 任务优先级\n## 要实现\n在 storage.py 中为任务增加优先级，按优先级排序。\n优先级取值、默认值和排序规则沿用此前已定方案。\n完成后说明修改位置，由用户复跑测试确认。\n## 不能改\n除 storage.py 和 tests/test_app.py 外，不修改其他文件。\n其他接口的行为保持原样。\n## 已定的技术决策\n仅扩展现有任务存储模块，不更换存储方式。\n不重新决定此前讨论确定的优先级方案。\n本次改动作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级排序",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码等于 0。",
+        "文件断言：tests/test_app.py 含 test_task_priority_default、test_task_priority_order 和 test_task_priority_persistence 三个测试函数。",
+        "python -c \"import ast, subprocess; from pathlib import Path; signature=lambda s: {n.name: ast.dump(n.args) for n in ast.parse(s).body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and not n.name.startswith('_')}; baseline=signature(subprocess.check_output(['git','show','HEAD:storage.py'],text=True,encoding='utf-8')); current=signature(Path('storage.py').read_text(encoding='utf-8')); assert all(current.get(k)==v for k,v in baseline.items())\" 退出码等于 0。",
+        "python -c \"import subprocess; allowed={'storage.py','tests/test_app.py'}; changed=subprocess.check_output(['git','diff','HEAD','--name-only'],text=True).splitlines(); assert set(changed).issubset(allowed), changed; untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines(); assert set(untracked).issubset(allowed), untracked\" 退出码等于 0。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "README.md",
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "优先级取值、默认值和排序规则沿用此前已定方案，不重新决策。",
+        "其他接口行为保持原样。",
+        "完成后说明修改位置，由用户复跑测试确认。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

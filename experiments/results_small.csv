@@ -1,0 +1,7 @@
+﻿plan,arm,status,verify_ok,failures,seconds
+s1-const,openai,done,ok,,95.3
+s1-const,deepseek,done,ok,,87.0
+s2-readme,openai,done,ok,,89.9
+s2-readme,deepseek,done,ok,,103.8
+s3-help,openai,done,ok,,58.6
+s3-help,deepseek,done,ok,,66.5

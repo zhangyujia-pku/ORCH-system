@@ -1,0 +1,7 @@
+{"event": "run.start", "ts": "2026-11-07T02:34:32+08:00", "session": 1, "data": {"run_id": "m3-sort-desc-r5-deepseek", "base": "681a24282058500003ac672f0ef807c22ae3f146", "n_tasks": 1, "layers": [["t01"]], "max_agents": 1, "worker": "codex-ds", "verifier": "codex-openai"}}
+{"event": "layer.start", "ts": "2026-11-07T02:34:32+08:00", "session": 1, "data": {"layer": 0, "tasks": ["t01"]}}
+{"event": "task.start", "ts": "2026-11-07T02:34:32+08:00", "session": 1, "data": {"task_id": "t01", "branch": "orch/m3-sort-desc-r5-deepseek/t01-a1", "worktree": "<HOME>\\WorkBuddy\\agent协同项目\\orchestrator\\experiments\\cmp\\m3-sort-desc-r5-deepseek\\wt\\t01-a1", "provider": "codex-ds"}}
+{"event": "task.committed", "ts": "2026-11-07T02:36:29+08:00", "session": 1, "data": {"task_id": "t01", "changed": ["storage.py", "tests/test_app.py"]}}
+{"event": "task.verify", "ts": "2026-11-07T02:36:32+08:00", "session": 1, "data": {"task_id": "t01", "ok": true, "failed": []}}
+{"event": "merge.result", "ts": "2026-11-07T02:36:33+08:00", "session": 1, "data": {"target": "orch/run-m3-sort-desc-r5-deepseek", "results": [{"branch": "orch/m3-sort-desc-r5-deepseek/t01-a1", "ok": true, "detail": ""}]}}
+{"event": "run.end", "ts": "2026-11-07T02:36:33+08:00", "session": 1, "data": {"ok": true, "done": 1, "total": 1, "merged": "orch/run-m3-sort-desc-r5-deepseek"}}

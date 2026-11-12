@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>成果总览</title>
+<style>
+  @page { size: A4; }
+  * { box-sizing: border-box; }
+  body { font-family: "Source Han Serif SC","Songti SC","SimSun",serif;
+         font-size: 10.5pt; line-height: 1.8; color: #1a1a1a; margin: 0; }
+  h1,h2 { font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif; }
+  h1 { font-size: 20pt; margin: 0 0 4pt; line-height: 1.3; }
+  h2 { font-size: 12.5pt; margin: 18pt 0 8pt; padding-bottom: 3pt;
+       border-bottom: 1pt solid #222; page-break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  .meta { color: #666; font-size: 9.5pt; }
+  .titleblock { border-top: 3pt solid #1a1a1a; padding-top: 12pt; margin-bottom: 12pt; }
+  .thesis { background: #f6f6f4; border-left: 3pt solid #1a1a1a; padding: 10pt 12pt; margin: 12pt 0; }
+  .thesis p { margin: 0 0 6pt; }
+  .thesis p:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0 10pt; font-size: 9.3pt; }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  th,td { padding: 4pt 6pt; border-bottom: .6pt solid #d8d8d8; text-align: left; vertical-align: top; }
+  th { background: #f0f0ee; border-bottom: 1pt solid #999; font-weight: 700;
+       font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif; }
+  td.n,th.n { text-align: right; }
+  code { font-family: "Cascadia Mono","Consolas",monospace; font-size: 8.8pt;
+         background: #f2f2f0; padding: 1pt 3pt; }
+  ol,ul { margin: 0 0 9pt; padding-left: 17pt; }
+  li { margin-bottom: 4pt; }
+  .small { font-size: 9pt; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <h1>多 Agent 编排：成果总览</h1>
+  <p class="meta">2026 年 11 月 6–9 日 · 七批实验 168 次运行 + 一条全链路 · changkong34@qq.com</p>
+</div>
+
+<div class="thesis">
+  <p><strong>一句话。</strong>决定成败的是"判据能不能被机器核对"，不是"模型够不够强"。</p>
+  <p>需求写得含糊，任何后端都会反复返工；需求写得可锚定，便宜的后端也能一次做对。</p>
+</div>
+
+<h2>三条结论</h2>
+
+<ol>
+  <li><strong>需求写法的效果是 U 形，不是越多越好。</strong>
+      最优点在"说清改哪个文件、做什么"；不给锚点必然返工，给两个反而略差，写得再长不会更好。</li>
+  <li><strong>失败的机制只有一个：判据不可判定。</strong>
+      80 次规划运行中 47 次拒稿，错误码 100% 是同一类，没有第二种失败形式。</li>
+  <li><strong>换更强的模型没有换来质量。</strong>
+      同一外壳换后端，三个后端都做对了同一批任务，差异只在速度（慢 1.5–1.7 倍）与成本（差 4 倍）。</li>
+</ol>
+
+<h2>七批实验</h2>
+
+<table>
+  <thead><tr><th style="width:7%">批次</th><th style="width:36%">问的问题</th><th class="n" style="width:7%">n</th><th>结果</th></tr></thead>
+  <tbody>
+  <tr><td>一</td><td>需求详细程度影响多大？</td><td class="n">30</td><td>U 形；L1 平均重写 1.00，L3 为 0.00，耗时差 2 倍</td></tr>
+  <tr><td>二</td><td>是不是"长度"或"指代"在起作用？</td><td class="n">20</td><td>配对实验，两者都排除（3 好 3 坏 4 平）</td></tr>
+  <tr><td>三</td><td>机制是什么？</td><td class="n">24</td><td>锚点 0 个最差、1 个最优、2 个回升；0 vs 1 的 p = 0.031</td></tr>
+  <tr><td>四</td><td>换个模型版本还成立吗？</td><td class="n">6</td><td>方向稳、水平漂（L3 从 0.00 变 0.33）</td></tr>
+  <tr><td>五</td><td>换后端，质量/速度变不变（Pro）</td><td class="n">36</td><td>质量无差；慢 1.68×，p = 0.00014</td></tr>
+  <tr><td>六</td><td>换更轻的档位能快回来吗（Flash）</td><td class="n">36</td><td>仍慢 1.53×（p = 0.015），只赚回 9%</td></tr>
+  <tr><td>七</td><td>每次任务花多少钱？</td><td class="n">16</td><td>Flash ¥0.039 / Pro ¥0.155，差 4 倍</td></tr>
+  </tbody>
+</table>
+
+<h2>两天之后：从"能跑"到"可冻结"</h2>
+
+<p>11 月 8–9 日没有做新实验，做的是把实验里那套东西变成<b>别人拿到也能跑</b>的系统。
+起因很朴素：真实的对话里跑一次，它失败了，而失败原因不是模型不行。</p>
+
+<table>
+  <thead><tr><th style="width:26%">新增能力</th><th>它解决的问题</th></tr></thead>
+  <tbody>
+  <tr><td><code>apply</code></td><td>产物只进集成分支，用户看不到变化；以前靠模型手动抄文件——手抄没有冲突检测，也不留记录</td></tr>
+  <tr><td><code>undo</code></td><td>"这次结果我不要了"要能一句话撤掉，且保留证据</td></tr>
+  <tr><td><code>cleanup</code> + 心跳</td><td>进程卡死后能判活、能回收。判活只看锁与心跳，<b>不看 pid</b>（pid 会复用）</td></tr>
+  <tr><td>三种模式 <code>single/parallel/chain</code></td><td>模式是对执行形态的<b>承诺</b>，写错即拒稿（E022/E023），不再只是标签</td></tr>
+  <tr><td><code>handoff</code> 溢出转引用</td><td>串联时上一阶段的交代超 200 字就落文件、只给摘要，避免上下文被撑爆</td></tr>
+  <tr><td>办公工具链</td><td>docx / xlsx / pptx 的生成与断言全部脚本化：模型只写内容，结构交给脚本</td></tr>
+  <tr><td><code>eta</code> 选档</td><td>按历史每层墙钟估时长，超过 8 分钟转投递，而不是等人猜</td></tr>
+  </tbody>
+</table>
+
+<p>真实对话里跑通的链路（各 1 次模型调用，worker 走 <code>deepseek-flash</code>）：</p>
+
+<table>
+  <thead><tr><th style="width:22%">任务</th><th class="n" style="width:12%">耗时</th><th>结果</th></tr></thead>
+  <tbody>
+  <tr><td>4 个模块实现</td><td class="n">67 s</td><td>4/4 通过，工作区经 <code>apply</code> 落地</td></tr>
+  <tr><td>文档 .docx</td><td class="n">107 s</td><td>187 字 / 3 段，断言真跑了（不是模型判的）</td></tr>
+  <tr><td>表格 .xlsx</td><td class="n">64 s</td><td>4 行×2 列，值逐格核对</td></tr>
+  <tr><td>幻灯片 .pptx</td><td class="n">70 s</td><td>4 页，独立实现（python-pptx）打开校验</td></tr>
+  </tbody>
+</table>
+
+<p>这两天修掉 12 处问题，其中 4 处属于同一类：<strong>看起来成功了，其实没成</strong>。
+沙箱卡死被记成"模型做错了"、运行目录跑到了 D 盘没人找得到、判据全被误判成"断言型"、
+验收脚本自己留下的 <code>__pycache__</code> 把合并挡住——每一条都只在真实运行里露头。</p>
+
+<div class="callout">
+  <div class="label">冻结时新增的一条硬规则</div>
+  <p>判据必须能写成一条没人看也能跑的断言，否则这个任务<b>不进实验集</b>。
+  判据弱，因变量就带噪声，算出来的成功率不可用——这已经不是工程问题，是效度问题。</p>
+</div>
+
+<h2>这套系统本身</h2>
+
+<p>四层结构：<strong>契约</strong>（把拆解写成可检查的字段）→ <strong>校验</strong>（23 条规则，提交前拒稿）→
+<strong>执行</strong>（每任务独立 worktree，越界即废）→ <strong>验收</strong>（判据、diff、文件内容，不给推理过程）。</p>
+
+<p>后端可替换：注册表里每个 worker 声明能力与成本权重，按能力分派、按配额计价。
+这条设计让"换模型有没有用"成了一个可测的问题，而不是一个信仰问题。</p>
+
+<p class="small">最有价值的一条工程经验来自踩坑：<strong>验收器能力不足时，失败会伪装成"被验收者的错误"</strong>。
+三次失败全是这样，如果不逐条核对证据，会把系统缺陷记成模型差异。</p>
+
+<h2>交付物</h2>
+
+<table style="page-break-inside: avoid;">
+  <thead><tr><th style="width:34%">文件</th><th>内容</th></tr></thead>
+  <tbody>
+  <tr><td><code>多Agent规划返工-研究报告-2026-11-06.pdf</code></td><td>第一版：四批 80 次规划运行（需求写法这条线）</td></tr>
+  <tr><td><code>02-增量记录-2026-11-07.pdf</code></td><td>增量：验收器修复、后端接入、88 次执行运行、成本实测</td></tr>
+  <tr><td><code>03-成果总览-2026-11-09.pdf</code></td><td>本文，三页</td></tr>
+  <tr><td><code>experiments/FINDINGS.md</code></td><td>逐批原始结论与局限</td></tr>
+  <tr><td><code>experiments/results*.csv</code></td><td>七批全部明细数据</td></tr>
+  <tr><td><code>04-设计冻结-v1.9-2026-11-09.pdf</code></td><td>系统设计与接口规格（v1.9，冻结版）</td></tr>
+  <tr><td><code>orch/</code> + <code>tests/</code></td><td>编排系统：9,491 行、337 个测试</td></tr>
+  <tr><td><code>dist/orch-v1.9.bundle</code></td><td>git bundle：拷到任何机器上 <code>git clone</code> 即可复现</td></tr>
+  </tbody>
+</table>
+
+<p class="small">封存包与校验和在 <code>dist/</code>；换机器复现的三步见冻结稿 §8.1 或
+<code>docs/REPRODUCE.md</code>。运行时是纯标准库，不需要装任何包。</p>
+
+</body>
+</html>

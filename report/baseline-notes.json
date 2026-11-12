@@ -1,0 +1,34 @@
+{
+  "task": "新建 NOTES.md，写一行 hello orch",
+  "model": "",
+  "model_label": "codex-ds-flash / deepseek-flash",
+  "sandbox": "bypass",
+  "exit_code": 0,
+  "wall_s": 68.5,
+  "usage": {
+    "input_tokens": 121071,
+    "cached_input_tokens": 120320,
+    "output_tokens": 217,
+    "turns": 1
+  },
+  "turns": 1,
+  "tokens_uncached_in": 751,
+  "changes": {
+    "files": [
+      "NOTES.md"
+    ],
+    "diff_stat": "",
+    "added_lines": 0
+  },
+  "acceptance": [
+    {
+      "command": "python -c \"import pathlib;assert 'hello orch' in pathlib.Path('NOTES.md').read_text(encoding='utf-8')\"",
+      "ok": true,
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "acceptance_ok": true,
+  "message": "已创建 `NOTES.md`，内容为一行 `hello orch`。"
+}

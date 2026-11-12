@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "在 README.md 末尾追加一行：运行方式：`python app.py`。",
+      "writes": [
+        "README.md"
+      ],
+      "reads": [],
+      "deps": [],
+      "acceptance": [
+        "文件断言：README.md 含 `运行方式` 这一节文字。"
+      ]
+    }
+  ]
+}

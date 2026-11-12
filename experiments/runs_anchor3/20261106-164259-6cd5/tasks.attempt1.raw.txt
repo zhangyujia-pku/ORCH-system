@@ -1,0 +1,49 @@
+```json
+{
+  "spec_md": "# 任务软删除\n## 要实现\n删除任务时仅标记为已删除，保留原始记录及原有字段。\n已删除任务在现有接口中的可见性与原删除行为一致。\n补充回归测试，交付时说明实际修改的文件和行为。\n## 不能改\n不增加接口，不调整无关功能，不改变删除接口的响应约定。\n其它接口对调用方的行为保持原样。\n不直接修改 tasks.json、缓存或依赖配置。\n## 已定的技术决策\n沿用现有 Python 实现和存储方式。\n使用内部软删除标记，兼容没有该标记的历史记录。\n软删除标记不新增到现有接口响应中。\n实现与回归验证存在顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "acceptance": [
+        "运行 `python -m pytest -q`，退出码为 0。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 包含使用临时存储的回归测试，删除后重新读取底层存储，断言目标记录仍存在、原有字段值保留且软删除标记生效。",
+        "文件断言：回归测试覆盖历史无标记记录的正常访问，以及删除后列表和单条访问的既有响应约定，明确断言响应内容或状态码。",
+        "文件断言：回归测试覆盖重复删除与不存在任务的删除，明确断言现有响应约定。",
+        "文件断言：回归测试断言现有接口响应不包含新增的内部软删除标记。",
+        "运行 `git diff --name-only`，输出路径仅包含 storage.py、app.py、cli.py、tests/test_app.py、tests/test_cli.py 中的文件。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        ".gitignore",
+        "requirements.txt",
+        "README.md",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "删除仅设置内部标记，底层保留原始记录。",
+        "历史记录缺少软删除标记时视为未删除。",
+        "现有接口的响应结构、状态约定与其它功能保持不变。",
+        "仅修改实现软删除及验证兼容性所必需的文件。",
+        "完成后报告实际修改位置及测试结果。"
+      ]
+    }
+  ]
+}
+```

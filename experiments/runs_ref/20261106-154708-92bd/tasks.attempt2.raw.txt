@@ -1,0 +1,28 @@
+```json
+{
+  "spec_md": "# CLI 耗时输出\n## 要实现什么\n为 cli.py 的 main(argv) 增加 --verbose 开关，在 list 或 add 命令执行完成后打印一次耗时。\n未启用 --verbose 时保持现有输出；参数解析失败时不打印耗时。\n## 不能改什么\n不修改 app.py、storage.py、requirements.txt 或运行期数据文件。\n## 已定的技术决策\n使用 time.perf_counter 测量耗时。\n沿用现有 argparse 命令分发结构。\n实现与测试属于同一顺序依赖改动，合并为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现 CLI 可选耗时输出",
+      "reads": ["cli.py", "tests/test_cli.py"],
+      "writes": ["cli.py", "tests/test_cli.py"],
+      "acceptance": [
+        "python -m pytest -q tests/test_cli.py 退出码为 0。",
+        "文件断言：tests/test_cli.py 包含针对 list 和 add 启用 --verbose 后耗时输出次数等于 1 的测试断言。",
+        "文件断言：tests/test_cli.py 包含未启用 --verbose 时耗时输出次数等于 0 的测试断言。",
+        "文件断言：tests/test_cli.py 包含参数解析失败时耗时输出次数等于 0 的测试断言。",
+        "文件断言：cli.py 含 `time.perf_counter(` 调用或含 `from time import perf_counter` 导入语句与 `perf_counter(` 调用。"
+      ],
+      "forbidden": ["app.py", "storage.py", "requirements.txt", "tasks.json"],
+      "context_refs": [
+        "使用 time.perf_counter 测量耗时。",
+        "沿用现有 argparse 命令分发结构。",
+        "仅启用 --verbose 时在命令执行完成后打印一次耗时。",
+        "参数解析失败时不打印耗时。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

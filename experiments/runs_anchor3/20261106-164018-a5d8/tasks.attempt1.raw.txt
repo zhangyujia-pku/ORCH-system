@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 导出任务列表\n## 要实现\n在 storage.py 中增加任务列表导出能力，将当前任务列表写入表格文件。\n优先沿用 README.md 或现有代码中已明确的导出约定；若未定义格式，采用 UTF-8 BOM 编码的 CSV。\n导出列沿用现有任务数据模型中的字段，列顺序固定，每个任务对应一行。\n空列表仍输出表头；包含中文、逗号、引号和换行的字段必须可正确回读。\n## 不能改\n不修改 app.py、cli.py、requirements.txt 或现有接口的签名、返回值及异常行为。\n导出不得修改内存中的任务列表或持久化任务数据。\n不将运行期生成的表格、任务数据或缓存纳入提交。\n## 已定的技术决策\n导出逻辑集中在 storage.py，复用现有任务读取机制。\nCSV 使用 Python 标准库 csv，不引入依赖。\n新增导出入口与现有接口隔离，文件写入失败时向调用者报告异常。\n补充自动化测试，完成后报告修改文件、导出调用方式和测试结果。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表表格导出能力",
+      "reads": [
+        "README.md",
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 包含导出测试，覆盖正常列表、空列表、中文与逗号/引号/换行字段、写入失败；测试验证表头顺序和回读后的字段值。",
+        "文件断言：tests/test_app.py 包含导出无副作用测试，验证导出前后内存任务数据与临时持久化文件内容相同。",
+        "文件断言：storage.py 提供独立的导出函数，其调用方式、输出格式与编码通过函数文档字符串明确说明。",
+        "命令 git diff --name-only 的输出仅包含 storage.py 和 tests/test_app.py。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        "tests/test_cli.py",
+        "tasks.json",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "仅增加任务列表导出能力，现有接口行为保持不变。",
+        "优先沿用仓库中明确的导出约定；缺少约定时使用标准库 csv 输出 UTF-8 BOM CSV。",
+        "导出列取自现有任务数据模型，固定列顺序。",
+        "测试使用临时目录，不写入仓库内运行期数据。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

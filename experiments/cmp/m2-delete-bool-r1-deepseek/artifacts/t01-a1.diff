@@ -1,0 +1,77 @@
+diff --git a/cli.py b/cli.py
+index 9cc4d5c..dba974f 100644
+--- a/cli.py
++++ b/cli.py
+@@ -1,4 +1,4 @@
+-"""命令行入口：python cli.py list | add <title>"""
++"""命令行入口：python cli.py list | add <title> | rm <id>"""
+ 
+ import sys
+ 
+@@ -7,7 +7,7 @@ import storage
+ 
+ def main(argv):
+     if not argv:
+-        print("用法: cli.py list | add <title>")
++        print("用法: cli.py list | add <title> | rm <id>")
+         return 2
+     cmd = argv[0]
+     if cmd == "list":
+@@ -20,6 +20,20 @@ def main(argv):
+             return 2
+         print(storage.create(argv[1]))
+         return 0
++    if cmd == "rm":
++        if len(argv) < 2:
++            print("缺少 id")
++            return 2
++        try:
++            task_id = int(argv[1])
++        except ValueError:
++            print("不存在")
++            return 0
++        if storage.delete(task_id):
++            print("已删除")
++        else:
++            print("不存在")
++        return 0
+     print(f"未知命令: {cmd}")
+     return 2
+ 
+diff --git a/storage.py b/storage.py
+index e88bd7c..2c7e996 100644
+--- a/storage.py
++++ b/storage.py
+@@ -27,4 +27,4 @@ def create(title):
+ 
+ 
+ def delete(task_id):
+-    return TASKS.pop(task_id, None)
++    return TASKS.pop(task_id, None) is not None
+diff --git a/tests/test_cli.py b/tests/test_cli.py
+index a586933..431d182 100644
+--- a/tests/test_cli.py
++++ b/tests/test_cli.py
+@@ -10,3 +10,21 @@ def test_add_then_list(capsys):
+     assert main(["add", "写周报"]) == 0
+     assert main(["list"]) == 0
+     assert "写周报" in capsys.readouterr().out
++
++
++def test_delete_returns_bool():
++    t = storage.create("任务A")
++    assert storage.delete(t["id"]) is True
++    assert storage.delete(t["id"]) is False
++    assert storage.delete(999) is False
++
++
++def test_rm_deletes(capsys):
++    t = storage.create("写周报")
++    assert main(["rm", str(t["id"])]) == 0
++    assert capsys.readouterr().out.strip() == "已删除"
++
++
++def test_rm_missing(capsys):
++    assert main(["rm", "999"]) == 0
++    assert capsys.readouterr().out.strip() == "不存在"
+\ No newline at end of file

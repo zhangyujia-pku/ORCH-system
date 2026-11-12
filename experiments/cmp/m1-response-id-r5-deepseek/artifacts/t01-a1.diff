@@ -1,0 +1,23 @@
+diff --git a/app.py b/app.py
+index 9f614b4..ebf43fb 100644
+--- a/app.py
++++ b/app.py
+@@ -15,4 +15,4 @@ def create_task():
+     title = (request.json or {}).get("title", "").strip()
+     if not title:
+         return jsonify({"error": "title required"}), 400
+-    return jsonify(storage.create(title)), 201
++    return jsonify({"id": storage.create(title)["id"]}), 201
+diff --git a/tests/test_app.py b/tests/test_app.py
+index e61f00f..ef4ef4a 100644
+--- a/tests/test_app.py
++++ b/tests/test_app.py
+@@ -22,7 +22,7 @@ def test_list_empty(client):
+ def test_create_task(client):
+     r = client.post("/tasks", json={"title": "买牛奶"})
+     assert r.status_code == 201
+-    assert r.get_json()["title"] == "买牛奶"
++    assert r.get_json()["id"] == 1
+ 
+ 
+ def test_create_requires_title(client):

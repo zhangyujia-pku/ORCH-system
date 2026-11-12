@@ -1,0 +1,45 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现可靠的任务持久化",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：`tests/test_app.py` 含测试函数 `test_persistence_restart`、`test_persistence_missing_file`、`test_persistence_unicode_roundtrip`、`test_persistence_corrupt_json`、`test_persistence_write_failure`；这些测试分别断言重建应用后任务恢复、缺失文件返回空列表、中文内容往返相等、损坏 JSON 明确报错且原文件内容未被修改、写入失败明确报错且原文件内容未被修改。",
+        "命令 `python -m pytest -q tests/test_app.py::test_persistence_restart tests/test_app.py::test_persistence_missing_file tests/test_app.py::test_persistence_unicode_roundtrip tests/test_app.py::test_persistence_corrupt_json tests/test_app.py::test_persistence_write_failure` 退出码等于 0。",
+        "文件断言：`storage.py` 含 `os.replace` 调用；临时文件创建调用含 `dir=` 参数，其值等于目标文件父目录；失败清理分支含临时文件删除调用。",
+        "文件断言：`README.md` 含小节 `默认数据文件位置`、`保存时机`、`重启恢复`、`损坏文件处理`、`读写失败处理`，每个小节含对应行为说明。",
+        "命令 `git diff --name-only -- tasks.json requirements.txt .gitignore` 退出码等于 0，标准输出等于空字符串。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "沿用 Python 与 JSON 文件存储，不引入新依赖。",
+        "保留现有应用与 CLI 的公开接口。",
+        "使用同目录临时文件和原子替换保存数据，失败时清理临时文件。",
+        "损坏文件与读写失败必须明确报错，不覆盖已有数据。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

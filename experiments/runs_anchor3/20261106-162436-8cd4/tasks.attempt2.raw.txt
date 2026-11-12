@@ -1,0 +1,41 @@
+```json
+{
+  "spec_md": "# 任务数据文件持久化\n## 要实现什么\n在 storage.py 中实现任务数据的文件保存与重启恢复，沿用已定方向。\n现有接口的行为保持不变。\n完成后说明 storage.py 的改动与验证结果，供用户复测。\n## 不能改什么\n不修改 storage.py 之外的文件，不提交运行期数据、日志或缓存。\n## 已定的技术决策\n沿用现有文件存储方向，不重新设计其它接口。\n本需求属于单模块改动，保持一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据的文件持久化",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码 0。",
+        "文件断言：storage.py 含任务数据写入文件的调用，含从文件读取任务数据的调用。",
+        "命令 `git diff --name-only` 的输出仅含 storage.py。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        ".gitignore",
+        "tests/**"
+      ],
+      "context_refs": [
+        "任务数据保存到文件，重启后恢复。",
+        "保持现有接口行为不变。",
+        "只修改 storage.py，完成后说明改动与验证结果。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

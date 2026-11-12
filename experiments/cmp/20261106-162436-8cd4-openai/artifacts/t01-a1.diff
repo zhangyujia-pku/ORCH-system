@@ -1,0 +1,10 @@
+diff --git a/storage.py b/storage.py
+index 8d82399..0430539 100644
+--- a/storage.py
++++ b/storage.py
+@@ -1,4 +1,4 @@
+-"""内存任务存储。所有读写都走这里，方便以后换持久化。"""
++"""JSON task storage: restore on startup and save after each write."""
+ 
+ import json
+ from pathlib import Path

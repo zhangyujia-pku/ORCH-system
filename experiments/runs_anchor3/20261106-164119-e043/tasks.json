@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表表格导出",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 含导出入口、文件格式、列名顺序、空任务列表的断言。",
+        "文件断言：README.md 含已核实的导出入口、文件格式、列名及顺序、修改文件、行为变化的说明。",
+        "命令 `python -c \"import subprocess; allowed={'storage.py','app.py','tests/test_app.py','README.md'}; paths=subprocess.check_output(['git','diff','--name-only','HEAD'],text=True).splitlines(); assert set(paths) <= allowed, paths\"` 退出码等于 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "tests/test_cli.py",
+        ".gitignore",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "导出入口、文件格式、列名及顺序沿用此前已定方案，实施前从仓库核实。",
+        "其它接口的行为保持原样。",
+        "不改动任务列表导出以外的部分。",
+        "完成后说明修改位置，由用户再次运行测试确认。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

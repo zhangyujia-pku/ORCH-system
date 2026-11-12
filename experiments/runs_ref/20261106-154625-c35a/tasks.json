@@ -1,0 +1,37 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现 CLI 可选耗时输出",
+      "deps": [],
+      "reads": [
+        "cli.py",
+        "tests/test_cli.py",
+        "app.py",
+        "storage.py"
+      ],
+      "writes": [
+        "cli.py",
+        "tests/test_cli.py"
+      ],
+      "acceptance": [
+        "执行 `python -m pytest -q tests/test_cli.py`，退出码为 0。",
+        "文件断言：tests/test_cli.py 包含覆盖 `--verbose list` 和带有效参数的 `--verbose add` 的测试，通过可控时钟断言 stderr 恰好输出一行 `Elapsed: 0.250000s`。",
+        "文件断言：tests/test_cli.py 包含未启用 --verbose 时 list、add 不输出耗时且保留各自正常输出和返回行为的测试。",
+        "文件断言：tests/test_cli.py 包含参数解析失败时不输出耗时的测试。"
+      ],
+      "forbidden": [
+        "app.py",
+        "storage.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "--verbose 是全局参数，放在子命令之前。",
+        "使用 time.perf_counter()；耗时向 stderr 输出，格式为 Elapsed: <六位小数秒数>s。",
+        "参数解析失败不打印耗时。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

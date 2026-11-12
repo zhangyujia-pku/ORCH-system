@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务数据文件持久化\n## 要实现\n将任务数据保存到文件，重启后重新读取已保存的数据。\n完成后说明修改的文件与内容。\n## 不能改\n不改动其它接口的行为，不扩展无关功能。\n不修改仓库中的运行期数据文件 tasks.json。\n## 已定的技术决策\n沿用现有文件持久化方向与仓库约定，不引入数据库。\n持久化实现与回归测试作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据文件持久化",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md",
+        "requirements.txt"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "测试命令：python -m pytest -q tests/test_app.py tests/test_cli.py，退出码等于 0。",
+        "文件断言：tests/test_app.py 与 tests/test_cli.py 中 git show HEAD 对应文件所含的已有测试函数及其断言均保留。",
+        "文件断言：新增持久化测试使用临时目录中的数据文件，测试代码不含指向仓库 tasks.json 的读写操作。",
+        "文件断言：新增持久化测试包含保存任务后重新初始化存储并读取的断言，读取结果等于保存的任务数据。",
+        "文件断言：README.md 含本次修改的文件列表、持久化行为说明与测试命令。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        ".gitignore",
+        "requirements.txt"
+      ],
+      "context_refs": [
+        "沿用文件持久化方向与现有仓库约定，不引入数据库。",
+        "其它接口行为保持原样，不扩展无关功能。",
+        "测试使用临时数据文件，不修改仓库 tasks.json。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

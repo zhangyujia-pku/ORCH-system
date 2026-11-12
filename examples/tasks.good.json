@@ -1,0 +1,65 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "固化认证接口与类型定义",
+      "reads": ["src/app.py"],
+      "writes": ["src/auth/types.py", "docs/auth-api.md"],
+      "acceptance": [
+        "`src/auth/types.py` 中存在类 `TokenPayload`",
+        "docs/auth-api.md 中包含 `POST /login` 且返回 `{token, expires_at}`"
+      ],
+      "forbidden": ["migrations/**"],
+      "context_refs": ["认证方案：JWT，不用 session", "token 有效期 2 小时"],
+      "budget": 0.6
+    },
+    {
+      "id": "t02",
+      "goal": "实现登录接口",
+      "deps": ["t01"],
+      "reads": ["src/app.py", "src/auth/types.py"],
+      "writes": ["src/auth/login.py"],
+      "acceptance": [
+        "pytest -q tests/test_auth.py::test_login_ok 退出码 0",
+        "pytest -q tests/test_auth.py::test_login_wrong_password 退出码 0"
+      ],
+      "forbidden": ["migrations/**"],
+      "budget": 1.2
+    },
+    {
+      "id": "t03",
+      "goal": "实现 token 校验中间件",
+      "deps": ["t01"],
+      "reads": ["src/app.py", "src/auth/types.py"],
+      "writes": ["src/auth/middleware.py"],
+      "acceptance": [
+        "pytest -q tests/test_auth.py::test_protected_requires_token 退出码 0"
+      ],
+      "context_refs": ["未带 token 时返回 401，不重定向"],
+      "budget": 1.0
+    },
+    {
+      "id": "t04",
+      "goal": "补齐认证相关测试",
+      "deps": ["t02", "t03"],
+      "reads": ["src/auth/login.py", "src/auth/middleware.py"],
+      "writes": ["tests/test_auth.py"],
+      "acceptance": [
+        "pytest -q tests/test_auth.py 退出码 0",
+        "pytest -q tests/test_auth.py --collect-only 输出含 3 个 test_ 函数"
+      ],
+      "budget": 0.8
+    },
+    {
+      "id": "t05",
+      "goal": "更新 README 的认证用法",
+      "deps": ["t02", "t03"],
+      "reads": ["README.md", "docs/auth-api.md"],
+      "writes": ["README.md"],
+      "acceptance": [
+        "README.md 中包含 `Authorization: Bearer` 用法说明"
+      ],
+      "budget": 0.3
+    }
+  ]
+}

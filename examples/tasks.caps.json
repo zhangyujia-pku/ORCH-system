@@ -1,0 +1,66 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "查 DeepSeek Harness 的 db-connector 插件当前支持哪些数据库",
+      "reads": [],
+      "writes": ["docs/dsh-db-connector.md"],
+      "acceptance": [
+        "文件 docs/dsh-db-connector.md 含 `sqlite`",
+        "文件 docs/dsh-db-connector.md 含 `postgres`"
+      ],
+      "needs": ["web"],
+      "context_refs": ["只写结论，不复制整页内容"]
+    },
+    {
+      "id": "t02",
+      "goal": "给 verifier 增加命令判据超时的处理分支",
+      "reads": ["orch/verifier.py"],
+      "writes": ["orch/verifier.py"],
+      "acceptance": [
+        "python -m unittest tests.test_verifier 退出码 0"
+      ]
+    },
+    {
+      "id": "t03",
+      "goal": "把路由决策写进 README 的能力路由章节",
+      "reads": ["README.md"],
+      "writes": ["README.md"],
+      "acceptance": [
+        "文件 README.md 含 `plugin`"
+      ]
+    },
+    {
+      "id": "t04",
+      "goal": "重构 contract 与 workers 的模块边界",
+      "reads": [
+        "orch/contract.py",
+        "orch/workers.py",
+        "orch/cli.py",
+        "orch/runner.py",
+        "orch/planner.py"
+      ],
+      "writes": [
+        "orch/contract.py",
+        "orch/workers.py",
+        "orch/cli.py",
+        "orch/runner.py",
+        "orch/planner.py"
+      ],
+      "acceptance": [
+        "python -m unittest discover -s tests -t . 退出码 0"
+      ]
+    },
+    {
+      "id": "t05",
+      "goal": "从 traces 库汇总各 worker 的验收通过率",
+      "reads": [],
+      "writes": ["reports/worker-rate.md"],
+      "acceptance": [
+        "文件 reports/worker-rate.md 含 `通过率`"
+      ],
+      "needs": ["db"],
+      "context_refs": ["数据在 runs/*/traces.sqlite，只读查询"]
+    }
+  ]
+}

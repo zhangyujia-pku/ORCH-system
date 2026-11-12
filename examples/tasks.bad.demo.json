@@ -1,0 +1,30 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "goal": "实现登录功能并且补充测试",
+      "writes": [],
+      "acceptance": ["用户可以正常登录", "代码质量良好"]
+    },
+    {
+      "id": "t2",
+      "goal": "编写登录接口",
+      "deps": ["t1"],
+      "writes": ["src/auth/login.py"],
+      "acceptance": ["接口返回正确"]
+    },
+    {
+      "id": "t3",
+      "goal": "处理登录错误分支",
+      "writes": ["src/auth/login.py"],
+      "acceptance": ["pytest -q tests/test_auth.py 退出码 0"]
+    },
+    {
+      "id": "t4",
+      "goal": "补充文档",
+      "deps": ["t2", "t9"],
+      "writes": ["docs/auth.md"],
+      "acceptance": ["docs/auth.md 中包含 `Authorization: Bearer`"]
+    }
+  ]
+}

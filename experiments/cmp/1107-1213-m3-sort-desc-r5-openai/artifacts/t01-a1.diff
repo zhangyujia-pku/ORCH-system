@@ -1,0 +1,33 @@
+diff --git a/storage.py b/storage.py
+index e88bd7c..0746a83 100644
+--- a/storage.py
++++ b/storage.py
+@@ -11,7 +11,7 @@ def reset():
+ 
+ 
+ def list_all():
+-    return list(TASKS.values())
++    return sorted(TASKS.values(), key=lambda task: task["id"], reverse=True)
+ 
+ 
+ def get(task_id):
+diff --git a/tests/test_app.py b/tests/test_app.py
+index e61f00f..7e5a448 100644
+--- a/tests/test_app.py
++++ b/tests/test_app.py
+@@ -19,6 +19,15 @@ def test_list_empty(client):
+     assert client.get("/tasks").get_json() == []
+ 
+ 
++def test_list_tasks_by_id_descending(client):
++    storage.create("a")
++    storage.create("b")
++    storage.create("c")
++
++    assert [task["id"] for task in storage.list_all()] == [3, 2, 1]
++    assert [task["id"] for task in client.get("/tasks").get_json()] == [3, 2, 1]
++
++
+ def test_create_task(client):
+     r = client.post("/tasks", json={"title": "买牛奶"})
+     assert r.status_code == 201

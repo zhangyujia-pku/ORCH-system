@@ -1,0 +1,40 @@
+```json
+{
+  "spec_md": "# 任务存储持久化\n## 要实现\n在 storage.py 中添加 _save()，将全部任务序列化后覆盖写入模块同目录的 tasks.json。\n每次成功的增、删、改操作更新内存状态后调用 _save()。\n## 不能改\n不修改 app.py、cli.py、现有测试或公开接口；不添加启动加载功能。\n不将运行期生成的 tasks.json 列入源码写集。\n## 已定的技术决策\n使用标准库 json。\n保存路径基于 storage.py 的 __file__ 定位，不依赖当前工作目录。\n该需求属于单模块内的紧密关联改动，采用一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务存储的自动持久化",
+      "reads": [
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 含模块级函数 _save()，其函数体含标准库 json.dump 或 json.dumps 调用，序列化参数等于当前完整任务集合。",
+        "文件断言：_save() 使用的输出路径等于 storage.py 的 __file__ 所在目录拼接 tasks.json。",
+        "文件断言：storage.py 每个成功执行增、删、改的分支均含 _save() 调用，调用位置位于内存状态更新之后。",
+        "文件断言：_save() 打开目标文件的模式等于 w 或 wt，不含追加模式 a 或 at。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "tests/**",
+        "README.md",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "使用标准库 json 保存全部任务。",
+        "保存路径基于 storage.py 的 __file__ 定位。",
+        "每次成功写操作更新内存后调用 _save()。",
+        "覆盖写入 tasks.json，不添加启动加载功能，不改变公开接口。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

@@ -1,0 +1,9 @@
+{
+ "id": "t03",
+ "tier": "M",
+ "goal": "在 src 下四个模块（a/b/c/d）里实现对应函数，行为见 README，验收跑 python checks/check_all.py",
+ "timeout_s": 1800,
+ "accept": [
+  "python checks/check_all.py"
+ ]
+}

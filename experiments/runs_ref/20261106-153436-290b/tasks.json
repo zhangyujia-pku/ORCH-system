@@ -1,0 +1,39 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现由存储层提供结果的任务搜索",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 定义可调用的 search(keyword)，返回匹配关键词的任务对象列表。",
+        "文件断言：app.py 的搜索入口将收到的关键词传给 storage.search，响应内容仅对该函数返回值进行 JSON 序列化。",
+        "文件断言：tests/test_app.py 包含搜索命中和无匹配结果的测试。",
+        "文件断言：tests/test_app.py 包含替换 storage.search 返回值的测试，断言入口传入正确关键词，响应 JSON 保留返回对象的全部字段、值和列表顺序。",
+        "命令：python -m pytest -q，期望退出码为 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "搜索逻辑放在 storage.py；app.py 只负责调用和 JSON 序列化。",
+        "沿用现有任务对象结构、存储方式和关键词匹配约定。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现登录接口",
+      "writes": [
+        "src/a.py"
+      ],
+      "acceptance": [
+        "pytest -q tests/test_auth.py 退出码 0"
+      ],
+      "deps": [
+        "t02"
+      ]
+    },
+    {
+      "id": "t02",
+      "goal": "实现登录接口",
+      "writes": [
+        "src/b.py"
+      ],
+      "acceptance": [
+        "pytest -q tests/test_auth.py 退出码 0"
+      ],
+      "deps": [
+        "t01"
+      ]
+    }
+  ]
+}

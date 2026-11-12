@@ -1,0 +1,39 @@
+```json
+{
+  "spec_md": "# 任务搜索\n## 要实现\n在 storage.py 中新增 search(keyword)，负责搜索任务并返回匹配结果。\napp.py 调用 storage.search(keyword)，仅将其返回值转换为 JSON，保持结果内容和顺序。\n补充搜索与接口委托测试。\n## 不能改\n不修改 cli.py、requirements.txt 或任务持久化格式。\n不提交 tasks.json、缓存等运行期数据。\n## 已定的技术决策\n沿用现有任务结构、存储方式和 JSON 响应机制。\n搜索逻辑集中在 storage.py，app.py 不重复筛选或重组结果。\n本需求存在实现与验证的顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词搜索",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 定义可调用的 search(keyword)，返回匹配任务的列表。",
+        "文件断言：tests/test_app.py 包含 storage.search 的匹配与无匹配测试，无匹配时断言返回空列表。",
+        "文件断言：tests/test_app.py 包含接口委托测试，替换 storage.search 后断言其收到请求中的 keyword，响应 JSON 与替换函数返回的任务列表完全一致，包含相同字段和顺序。",
+        "命令：python -m pytest -q tests/test_app.py tests/test_cli.py，期望退出码为 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "搜索逻辑由 storage.search(keyword) 负责。",
+        "app.py 仅委托搜索并序列化返回值，不筛选或重组结果。",
+        "沿用现有任务结构、存储方式和 JSON 响应机制。"
+      ]
+    }
+  ]
+}
+```

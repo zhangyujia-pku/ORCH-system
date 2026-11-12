@@ -1,0 +1,9 @@
+{
+  "max_attempts": 3,
+  "switch_after": 1,
+  "switch_workers": true,
+  "max_calls": 30,
+  "max_commands": 60,
+  "total_timeout": 1800,
+  "max_replans": 1
+}

@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现登录接口",
+      "writes": [
+        "src/auth.py"
+      ],
+      "acceptance": [
+        "界面美观，交互流畅"
+      ]
+    }
+  ]
+}

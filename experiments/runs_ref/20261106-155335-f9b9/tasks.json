@@ -1,0 +1,27 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "添加请求访问日志钩子",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "app.py"
+      ],
+      "acceptance": [
+        "文件断言：app.py 含 `@app.after_request`、`request.path`、`response.status_code` 和 `return response`。",
+        "命令：python -m pytest -q tests/test_app.py，退出码等于 0。"
+      ],
+      "forbidden": [],
+      "context_refs": [
+        "使用 Flask 的 after_request 钩子",
+        "通过应用日志记录每个请求的路径和响应状态码",
+        "返回原响应，不改变现有接口行为和存储逻辑"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

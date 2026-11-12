@@ -1,0 +1,42 @@
+```json
+{
+  "spec_md": "# 任务优先级\n## 要实现什么\n为任务增加优先级字段，按已讨论确定的优先级规则排序。\n修改 storage.py 与 app.py 中涉及任务数据的必要逻辑，补充回归测试。\n在 README.md 中记录修改位置、优先级规则与测试结果。\n## 不能改什么\n不调整其它接口的既有行为，不重构无关代码。\n不修改 cli.py、requirements.txt、.gitignore 或运行期数据 tasks.json。\n## 已定的技术决策\n沿用现有 Python 实现与数据存储方式。\n沿用此前确定的优先级取值、默认值与排序方向，不重新设计。\n存储与应用逻辑存在顺序依赖，合并为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级支持",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "文件断言：tests/test_app.py 中存在 test_priority_round_trip、test_priority_sort_order、test_legacy_task_default_priority 三个测试函数，分别断言优先级保存后读取一致、任务按已定优先级规则排序、缺少优先级字段的旧任务使用已定默认值。",
+        "运行 python -m pytest -q tests/test_app.py tests/test_cli.py，退出码为 0。",
+        "文件断言：README.md 中存在标题 `## 本次修改`、`## 优先级规则`、`## 测试结果`；`## 本次修改` 下列出 storage.py、app.py、tests/test_app.py；`## 测试结果` 下包含实际执行的 `python -m pytest -q tests/test_app.py tests/test_cli.py` 命令与数字退出码。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用此前确定的优先级取值、默认值与排序方向。",
+        "其它接口的既有行为保持不变。",
+        "沿用现有 Python 实现与数据存储方式。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级存储排序",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_storage.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_storage.py 退出码为 0。",
+        "文件断言：tests/test_storage.py 包含测试，验证 create 接收显式 priority 且保存该字段，省略 priority 时保存 0。",
+        "文件断言：tests/test_storage.py 包含测试，以乱序优先级创建任务，断言 list_all 返回的优先级为降序。",
+        "文件断言：tests/test_storage.py 包含测试，验证旧任务缺少 priority 时按 0 排序，相同优先级保持插入顺序；测试使用临时存储。",
+        "python -m pytest -q 退出码为 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "priority 默认值为 0，随任务保存。",
+        "旧任务缺少 priority 时按 0 排序。",
+        "相同 priority 保持插入顺序。",
+        "沿用现有存储方式，保持现有调用兼容。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

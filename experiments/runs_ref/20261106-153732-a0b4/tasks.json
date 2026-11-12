@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务 CSV 导出路由",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py::test_export_tasks_csv 退出码 0；该测试断言 GET /tasks/export 返回 200、Content-Type 含 text/csv，并使用 csv.reader 断言两条任务的解析结果等于预先构造的三列表头及两行期望值。",
+        "python -m pytest -q tests/test_app.py::test_export_tasks_csv_special_characters 退出码 0；该测试使用标题字符串 '中文,逗号\"双引号\\n换行'，断言 csv.reader 解析出的标题等于该字符串。",
+        "python -m pytest -q tests/test_app.py::test_export_tasks_csv_empty 退出码 0；该测试将存储读取接口替换为返回空列表，断言 csv.reader 解析结果等于仅包含三列表头的列表。",
+        "python -m pytest -q tests/test_app.py::test_export_tasks_uses_storage 退出码 0；该测试替换 storage.py 的现有读取接口，断言 GET /tasks/export 调用该接口 1 次，并在直接访问 tasks.json 时令测试失败。",
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码 0"
+      ],
+      "forbidden": [
+        "storage.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "路由及响应组装位于 app.py。",
+        "通过 storage.py 现有读取接口获取任务列表。",
+        "使用 Python 标准库 csv，输出 UTF-8 编码的 text/csv 响应。",
+        "三列依次为任务 ID、标题、完成状态，表头沿用现有字段名。",
+        "保留存储返回顺序，空列表仅输出表头。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+diff --git a/storage.py b/storage.py
+index 8d82399..4303cf0 100644
+--- a/storage.py
++++ b/storage.py
+@@ -4,7 +4,7 @@ import json
+ from pathlib import Path
+ 
+ 
+-DATA_FILE = Path(__file__).resolve().parent / "tasks.json"
++DATA_FILE = globals().get("DATA_FILE", Path(__file__).resolve().parent / "tasks.json")
+ 
+ 
+ def _load():
+diff --git a/tests/test_app.py b/tests/test_app.py
+index e61f00f..6ab192d 100644
+--- a/tests/test_app.py
++++ b/tests/test_app.py
+@@ -1,9 +1,20 @@
++import importlib
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
+ import pytest
+ 
+ import storage
+ from app import app
+ 
+ 
++@pytest.fixture(scope="session", autouse=True)
++def temporary_storage():
++    with TemporaryDirectory() as directory, pytest.MonkeyPatch.context() as patch:
++        patch.setattr(storage, "DATA_FILE", Path(directory) / "tasks.json")
++        yield
++
++
+ @pytest.fixture(autouse=True)
+ def clean():
+     storage.reset()
+@@ -27,3 +38,14 @@ def test_create_task(client):
+ 
+ def test_create_requires_title(client):
+     assert client.post("/tasks", json={}).status_code == 400
++
++
++def test_storage_persists_tasks_after_restart():
++    storage.create("first task")
++    storage.create("second task")
++    saved_tasks = storage.list_all()
++
++    importlib.reload(storage)
++
++    assert storage.list_all() == saved_tasks
++    assert storage.create("third task")["id"] == 3

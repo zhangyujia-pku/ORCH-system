@@ -1,0 +1,49 @@
+```json
+{
+  "spec_md": "# 任务列表分页\n## 要实现\n为现有任务列表接口增加分页能力，一次返回请求范围内的任务。\n覆盖分页边界与其它接口的回归测试。\n完成后说明实际修改的文件、行为和测试结果。\n## 不能改\n不扩展到其它功能，不改变其它接口的行为。\n不修改 cli.py、tests/test_cli.py、requirements.txt 或运行期数据文件。\n## 已定的技术决策\n沿用现有 Python 项目、存储方式和接口约定，不新增依赖。\n需求引用的既往分页参数、默认值和响应结构未在输入中提供；实施前须确认这些约定，不自行重新设计。\n分页实现与验收测试存在顺序依赖，合并为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表分页",
+      "reads": [
+        "app.py",
+        "storage.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "requirements.txt",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "文件断言：README.md 明确记录经确认的分页参数、默认值、合法范围、响应结构和不传分页参数时的行为。",
+        "文件断言：tests/test_app.py 包含分页测试，使用固定任务集断言首批、中间批、末批返回的任务标识及数量符合已确认约定。",
+        "文件断言：tests/test_app.py 包含空列表、越界请求和非法分页参数的测试，断言符合 README.md 记录的行为。",
+        "文件断言：tests/test_app.py 包含遍历全部分页的测试，断言拼接后的任务标识与预期有序任务集完全一致，无遗漏或重复。",
+        "命令：python -m pytest -q tests/test_app.py tests/test_cli.py；期望退出码为 0。",
+        "文件断言：README.md 包含本次实际修改的文件、分页行为说明和测试执行结果。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "tests/test_cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "仅任务列表增加分页，其它接口行为保持原样。",
+        "既往分页约定未包含在输入中，实施前须确认，不能将自行选择的参数或默认值视为已定决策。",
+        "沿用现有技术栈和存储方式，不新增依赖。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务列表分页\n## 要实现什么\n为任务列表增加分页能力，每次只返回指定范围的任务。\n补充分页测试，说明修改的文件和行为。\n## 不能改什么\n其它接口的行为保持原样。\n不修改 cli.py、tests/test_cli.py、requirements.txt、.gitignore。\n不提交运行期数据文件、日志或缓存。\n## 已定的技术决策\n沿用现有技术栈和存储方式。\n分页方案遵循此前已确定的约定，不扩展其它功能。\n本次改动作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表分页",
+      "reads": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 包含分页测试，断言第一页、后续页、末页和超出范围的页面返回预期任务集合。",
+        "文件断言：tests/test_app.py 包含其它现有接口的回归测试。",
+        "文件断言：README.md 记录分页参数、默认行为、调用示例和本次修改涉及的文件。",
+        "命令 `git diff --name-only -- cli.py tests/test_cli.py requirements.txt .gitignore` 的输出等于空字符串。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "tests/test_cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "仅增加任务列表分页能力。",
+        "遵循此前已确定的分页约定。",
+        "沿用现有技术栈和存储方式。",
+        "其它接口的行为保持原样。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

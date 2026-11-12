@@ -1,0 +1,49 @@
+```json
+{
+  "spec_md": "# 任务数据文件持久化\n## 要实现\n将任务数据写入文件，进程重启后能够重新读取已保存的任务。\n沿用仓库已有的存储约定；本需求未提供的历史讨论细节不作额外假设。\n交付时说明实际修改的文件与内容，并提供测试命令和结果。\n## 不能改\n其它接口的调用方式、返回结构和既有行为保持不变。\n不新增无关功能，不修改依赖，不提交运行期数据、日志或缓存。\n## 已定的技术决策\n使用文件持久化，沿用现有任务数据结构和文件路径约定。\n围绕 storage.py 实现；app.py、cli.py 仅允许必要的存储接入修改。\n持久化验证使用临时目录，避免污染仓库中的任务数据。\n## 任务划分\n持久化实现、调用接入与重启验证存在顺序依赖，合为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数据文件持久化",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 中存在使用临时目录的持久化测试，断言保存后的文件内容包含任务数据。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 中存在跨独立进程的重启测试，断言第二个进程从第一个进程写入的文件读取到相同任务字段和值。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 中存在首次运行时数据文件不存在的测试，断言按现有接口约定正常初始化。",
+        "文件断言：tests/test_app.py 与 tests/test_cli.py 中已有接口行为断言保留，新增持久化测试不使用仓库中的 tasks.json。",
+        "文件断言：app.py、cli.py 的改动仅涉及持久化接入，不更改已有接口签名、返回结构或命令行参数。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "默认不拆分；本需求按一个完整任务交付。",
+        "采用文件持久化，沿用仓库现有数据结构和路径约定。",
+        "其它接口的既有行为保持不变。",
+        "完成后报告实际改动与测试结果。"
+      ]
+    }
+  ]
+}
+```

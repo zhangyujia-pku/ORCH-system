@@ -1,0 +1,45 @@
+```json
+{
+  "spec_md": "# 任务关键词筛选\n## 要实现\n在 storage.py 与 app.py 的现有任务查询流程中增加可选关键词筛选。\n沿用仓库中已有的任务文本字段、接口形式与筛选约定；实现前检查现有代码和测试。\n未提供关键词时保持原有行为。\n补充关键词命中、无匹配、未传关键词的回归测试。\n交付说明列出修改文件、具体变化和测试结果。\n## 不能改\n不改 cli.py、requirements.txt、运行期数据文件及无关功能。\n不改变其它接口的参数、返回结构、状态码和行为。\n## 已定的技术决策\n继续使用现有 Python 技术栈与存储方式。\n筛选逻辑放在 storage.py，app.py 负责沿用现有接口约定传递筛选条件。\n当前输入未包含此前讨论的具体匹配规则；优先采用仓库已明确的约定，不擅自增加搜索模式。\n本需求属于跨文件的同一查询流程，按一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词筛选",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 包含关键词命中的测试，断言返回任务标识集合等于预期匹配集合，且测试数据包含匹配与不匹配任务。",
+        "文件断言：tests/test_app.py 包含关键词无匹配的测试，断言返回空任务集合。",
+        "文件断言：tests/test_app.py 包含未传关键词的回归测试，断言返回全部预置任务及既有响应结构。",
+        "文件断言：storage.py 实现关键词筛选，app.py 将可选关键词传递给该存储查询逻辑。",
+        "文件断言：git diff --name-only 输出的每个路径均属于 storage.py、app.py、tests/test_app.py。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "tests/test_cli.py",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "仅增加现有任务查询流程的可选关键词筛选。",
+        "沿用仓库已明确的匹配规则与接口约定；输入未提供此前讨论的具体内容。",
+        "其它接口行为保持不变。",
+        "交付时说明修改位置、行为变化和实际测试结果。"
+      ]
+    }
+  ]
+}
+```

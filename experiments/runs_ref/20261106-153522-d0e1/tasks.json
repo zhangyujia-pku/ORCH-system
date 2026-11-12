@@ -1,0 +1,38 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词搜索",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 定义可调用的 search(keyword)，返回匹配任务的列表。",
+        "文件断言：tests/test_app.py 包含 storage.search 的匹配与无匹配测试，无匹配时断言返回空列表。",
+        "文件断言：tests/test_app.py 包含接口委托测试，替换 storage.search 后断言其收到请求中的 keyword，响应 JSON 与替换函数返回的任务列表完全一致，包含相同字段和顺序。",
+        "命令：python -m pytest -q tests/test_app.py tests/test_cli.py，期望退出码为 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "搜索逻辑由 storage.search(keyword) 负责。",
+        "app.py 仅委托搜索并序列化返回值，不筛选或重组结果。",
+        "沿用现有任务结构、存储方式和 JSON 响应机制。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

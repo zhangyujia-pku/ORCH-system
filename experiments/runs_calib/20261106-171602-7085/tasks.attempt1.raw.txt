@@ -1,0 +1,25 @@
+```json
+{
+  "spec_md": "# 任务统计接口\n## 要实现\n在 storage.py 新增 stats()，返回包含 total 和 done 两个整数的字典。\ntotal 为全部任务数，done 为已完成任务数；空任务集两者均为 0。\n在 app.py 新增 GET /tasks/stats，返回上述统计结果，HTTP 状态码为 200。\n## 不能改\n不修改 CLI、依赖配置或运行期数据文件 tasks.json。\n保持现有任务接口行为兼容。\n## 已定技术决策\n沿用现有存储方式、完成状态字段及 Web 框架。\n接口调用 storage.stats() 获取统计，避免重复实现统计逻辑。\n确保静态统计路由不被任务 ID 路由匹配。\n存储实现与接口存在顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务统计功能",
+      "reads": ["storage.py", "app.py", "tests/test_app.py", "README.md"],
+      "writes": ["storage.py", "app.py", "tests/test_app.py"],
+      "acceptance": [
+        "文件断言：storage.py 定义可无参数调用的 stats()，返回字典，包含整数 total 和 done。",
+        "文件断言：tests/test_app.py 包含隔离存储的测试，断言空任务集的 stats() 返回 {\"total\": 0, \"done\": 0}，混合完成状态的三个任务返回 {\"total\": 3, \"done\": 2}。",
+        "文件断言：tests/test_app.py 包含 GET /tasks/stats 测试，断言空任务集与混合完成状态任务集均返回 HTTP 200，JSON 分别为 {\"total\": 0, \"done\": 0} 与 {\"total\": 3, \"done\": 2}。",
+        "python -m pytest -q 退出码为 0。"
+      ],
+      "forbidden": ["cli.py", "requirements.txt", "tasks.json", ".gitignore", "tests/test_cli.py"],
+      "context_refs": [
+        "沿用现有存储方式、完成状态字段及 Web 框架。",
+        "GET /tasks/stats 调用 storage.stats()，响应包含 total 和 done 两个整数。",
+        "测试使用隔离存储，不写入仓库中的 tasks.json。"
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "补全任务管理功能",
+      "writes": [
+        "**"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码 0"
+      ]
+    }
+  ]
+}

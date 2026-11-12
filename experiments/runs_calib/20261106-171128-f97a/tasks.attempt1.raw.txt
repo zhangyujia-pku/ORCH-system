@@ -1,0 +1,49 @@
+```json
+{
+  "spec_md": "# 任务关键词搜索\n## 要实现\n在现有应用入口和 CLI 中增加任务关键词搜索，沿用各入口现有交互方式。\n搜索范围为现有任务模型中的名称字段和描述字段（若存在）。\n关键词去除首尾空白，采用不区分大小写的子串匹配，支持中文。\n空关键词返回全部任务；无匹配时显示明确提示；搜索结果保留原有顺序。\n## 不能改\n不改变任务数据结构、持久化格式和现有增删改行为。\n不修改运行期数据、缓存或引入新依赖。\n## 已定的技术决策\n沿用现有 Python 技术栈，在 storage.py 集中实现搜索逻辑。\n应用入口与 CLI 复用该逻辑，具体参数命名遵循现有代码约定。\n搜索只读取任务，不修改持久化数据。\n## 任务划分\n搜索逻辑、入口接入和回归测试存在顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词搜索",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "requirements.txt",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "运行 `python -m pytest -q`，退出码为 0。",
+        "文件断言：tests/test_app.py 和 tests/test_cli.py 均包含搜索测试，覆盖中文关键词、大小写不敏感、首尾空白、空关键词返回全部任务、无匹配结果、结果顺序保持不变。",
+        "文件断言：搜索测试使用临时存储，断言搜索前后持久化文件内容一致。",
+        "文件断言：应用入口与 CLI 均调用 storage.py 中的共享搜索逻辑，无匹配时提供明确提示。",
+        "文件断言：README.md 包含应用入口搜索方式、可直接使用的 CLI 搜索示例和空关键词行为说明。",
+        "运行 `git diff --name-only -- tasks.json requirements.txt .gitignore`，标准输出为空。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        "requirements.txt",
+        ".gitignore",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "沿用现有任务字段和持久化格式，不新增依赖。",
+        "使用去除首尾空白、不区分大小写的子串匹配。",
+        "空关键词返回全部任务，搜索保留原有顺序。",
+        "在 storage.py 集中实现搜索逻辑，现有入口复用。"
+      ]
+    }
+  ]
+}
+```

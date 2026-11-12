@@ -1,0 +1,5 @@
+{"event": "run.start", "ts": "2026-11-07T02:37:46+08:00", "session": 1, "data": {"run_id": "m3-sort-desc-r6-deepseek", "base": "681a24282058500003ac672f0ef807c22ae3f146", "n_tasks": 1, "layers": [["t01"]], "max_agents": 1, "worker": "codex-ds", "verifier": "codex-openai"}}
+{"event": "layer.start", "ts": "2026-11-07T02:37:46+08:00", "session": 1, "data": {"layer": 0, "tasks": ["t01"]}}
+{"event": "task.start", "ts": "2026-11-07T02:37:47+08:00", "session": 1, "data": {"task_id": "t01", "branch": "orch/m3-sort-desc-r6-deepseek/t01-a1", "worktree": "<HOME>\\WorkBuddy\\agent协同项目\\orchestrator\\experiments\\cmp\\m3-sort-desc-r6-deepseek\\wt\\t01-a1", "provider": "codex-ds"}}
+{"event": "task.failed", "ts": "2026-11-07T11:21:57+08:00", "session": 1, "data": {"task_id": "t01", "reason": "<HOME>\\AppData\\Local\\OpenAI\\Codex\\bin\\14b838c1d074ff01\\codex.exe 超时（600s），已连子进程一起终止"}}
+{"event": "run.end", "ts": "2026-11-07T11:21:57+08:00", "session": 1, "data": {"ok": false, "done": 0, "total": 1, "merged": ""}}

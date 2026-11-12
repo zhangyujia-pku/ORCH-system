@@ -1,0 +1,39 @@
+```json
+{
+  "spec_md": "# CLI 命令耗时输出\n## 要实现\n为 cli.py 的 main(argv) 增加全局 --verbose 开关，支持 --verbose list 和 --verbose add。\n开启时，在子命令正常执行完成后打印一次耗时；不开启时保持原有输出。\n耗时输出格式为 elapsed: <非负秒数>s，位于命令原有输出之后。\n## 不能改\n不修改 app.py、storage.py、数据文件和依赖配置。\n保留 list、add 的现有参数、业务行为和返回值约定。\n## 已定的技术决策\n使用标准库 time.perf_counter 测量子命令执行耗时。\n耗时打印到标准输出。\n参数解析失败时不打印耗时。\n该改动集中于同一入口，实现与回归测试作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现 CLI 可选耗时输出",
+      "reads": [
+        "cli.py",
+        "storage.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "cli.py",
+        "tests/test_cli.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_cli.py 退出码为 0。",
+        "文件断言：tests/test_cli.py 包含通过 main(argv) 调用 --verbose list 的测试，断言原有命令输出后恰好出现一行匹配 ^elapsed: [0-9]+(?:\\.[0-9]+)?s$ 的耗时输出。",
+        "文件断言：tests/test_cli.py 包含通过 main(argv) 调用 --verbose add 的测试，断言添加成功且原有命令输出后恰好出现一行耗时输出。",
+        "文件断言：tests/test_cli.py 覆盖未传 --verbose 的 list、add，断言输出不含 elapsed:。",
+        "文件断言：tests/test_cli.py 覆盖参数解析失败，断言不打印耗时。",
+        "文件断言：cli.py 使用 time.perf_counter 或从 time 导入的 perf_counter 测量耗时。"
+      ],
+      "forbidden": [
+        "app.py",
+        "storage.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "--verbose 是位于子命令之前的全局开关。",
+        "仅在子命令正常执行完成后向标准输出打印一次 elapsed: <非负秒数>s。",
+        "使用标准库 time.perf_counter，不新增依赖。"
+      ]
+    }
+  ]
+}
+```

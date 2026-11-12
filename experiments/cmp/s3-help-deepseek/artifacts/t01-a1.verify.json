@@ -1,0 +1,8 @@
+[
+  {
+    "criterion": "命令 `python cli.py --help` 的输出含 `--verbose`。",
+    "kind": "command-output",
+    "ok": true,
+    "evidence": "$ python cli.py --help\n用法: cli.py list | add <title>\n--verbose  打印耗时\n→ 期望输出含「--verbose」：满足"
+  }
+]

@@ -1,0 +1,12 @@
+{
+ "id": "t04",
+ "tier": "M",
+ "goal": "tests/test_more.py 里有若干测试失败。修好它们，不要修改 tests/test_more.py，验收跑 python checks/check_t04.py",
+ "timeout_s": 1800,
+ "accept": [
+  "python checks/check_t04.py"
+ ],
+ "source_commit": "fbd5513",
+ "source_subject": "fix: validate the chunk size in chunked_even",
+ "upstream": "C:\\probe-repos\\more-itertools"
+}

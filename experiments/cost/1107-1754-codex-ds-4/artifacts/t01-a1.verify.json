@@ -1,0 +1,14 @@
+[
+  {
+    "criterion": "命令 `python -c \"from app import app; c=app.test_client(); print(c.post('/tasks', json={'title':'x'}).get_json())\"` 的输出为 {'id': 1}。",
+    "kind": "command-output",
+    "ok": true,
+    "evidence": "$ python -c \"from app import app; c=app.test_client(); print(c.post('/tasks', json={'title':'x'}).get_json())\"\n{'id': 1}\n→ 期望输出等于「{'id': 1}」：满足"
+  },
+  {
+    "criterion": "python -m pytest -q tests 退出码 0。",
+    "kind": "command",
+    "ok": true,
+    "evidence": "....                                                                     [100%]\n4 passed in 0.56s"
+  }
+]

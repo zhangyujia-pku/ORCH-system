@@ -1,0 +1,6 @@
+{
+  "checks": [
+    {"command": "python checks/check_all.py", "expected_exit": 0}
+  ],
+  "protected": ["checks/**"]
+}

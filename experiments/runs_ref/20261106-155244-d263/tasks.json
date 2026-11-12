@@ -1,0 +1,33 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "添加请求访问日志",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：app.py 注册响应钩子，通过日志机制记录请求路径和最终响应状态码，返回原响应。",
+        "文件断言：tests/test_app.py 包含日志捕获测试，分别验证正常请求、未知路径的 404 响应和错误响应；每个请求恰好产生一条访问记录，记录包含对应路径和实际响应状态码。",
+        "`python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "storage.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用现有框架的响应钩子和日志机制，不增加依赖。",
+        "保留现有路由、响应内容、状态码和存储行为。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "criterion": "命令 `python -m pytest -q tests/test_app.py::test_storage_persists_tasks_after_restart` 退出码为 0；该测试使用临时文件，保存任务后重新初始化存储，断言重新读取的任务数据与保存的数据相等。",
+    "kind": "command",
+    "ok": true,
+    "evidence": ".                                                                        [100%]\n1 passed in 0.44s"
+  },
+  {
+    "criterion": "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码为 0。",
+    "kind": "command",
+    "ok": true,
+    "evidence": ".....                                                                    [100%]\n5 passed in 0.51s"
+  }
+]

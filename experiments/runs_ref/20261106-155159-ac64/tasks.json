@@ -1,0 +1,35 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现 create 的空标题校验",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 的 create 在 title 等于空字符串时抛出 ValueError，校验位于持久化写入之前。",
+        "文件断言：tests/test_app.py 包含直接调用 storage.create 的测试，断言空字符串触发 ValueError，且临时存储文件的内容或不存在状态在调用前后保持一致。",
+        "文件断言：tests/test_app.py 包含非空标题创建成功且标题被保存的测试。",
+        "运行 python -m pytest -q，退出码为 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "空标题指空字符串。",
+        "由 storage.create 抛出内置 ValueError。",
+        "校验失败不得产生持久化写入。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

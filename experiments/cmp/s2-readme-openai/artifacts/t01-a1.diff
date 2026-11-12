@@ -1,0 +1,9 @@
+diff --git a/README.md b/README.md
+index 31918c6..723eb2d 100644
+--- a/README.md
++++ b/README.md
+@@ -12,3 +12,4 @@
+ ```
+ pytest -q
+ ```
++运行方式：`python app.py`。

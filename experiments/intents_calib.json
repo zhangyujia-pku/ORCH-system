@@ -1,0 +1,52 @@
+{
+  "note": "版本漂移校准：从第一批原样取 L1/L3 各 3 条，用当前 codex 版本重跑，检验 1.00 vs 0.00 的对比是否仍成立。",
+  "repo": "demo/tasks_app",
+  "levels": {
+    "L1": "极含糊",
+    "L3": "说清改哪做什么"
+  },
+  "cases": [
+    {
+      "id": "cal-persist-L1",
+      "pair": "persist",
+      "task": "persist",
+      "level": "L1",
+      "text": "帮我加个持久化，别每次重启都丢数据，做好一点。"
+    },
+    {
+      "id": "cal-persist-L3",
+      "pair": "persist",
+      "task": "persist",
+      "level": "L3",
+      "text": "在 storage.py 加持久化：启动时从 tasks.json 读取，每次写操作后保存。"
+    },
+    {
+      "id": "cal-search-L1",
+      "pair": "search",
+      "task": "search",
+      "level": "L1",
+      "text": "加个搜索，能用关键词找任务，体验好一点。"
+    },
+    {
+      "id": "cal-search-L3",
+      "pair": "search",
+      "task": "search",
+      "level": "L3",
+      "text": "在 storage.py 加 search(keyword) 返回标题含关键词的任务，在 app.py 加 GET /tasks/search 接口。"
+    },
+    {
+      "id": "cal-stats-L1",
+      "pair": "stats",
+      "task": "stats",
+      "level": "L1",
+      "text": "加个统计，看看有多少任务做完了。"
+    },
+    {
+      "id": "cal-stats-L3",
+      "pair": "stats",
+      "task": "stats",
+      "level": "L3",
+      "text": "在 storage.py 加 stats() 返回 total 和 done 两个数，在 app.py 加 GET /tasks/stats 接口。"
+    }
+  ]
+}

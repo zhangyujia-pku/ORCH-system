@@ -1,0 +1,5 @@
+﻿plan,arm,status,verify_ok,failures,seconds
+20261106-162159-765a,openai,done,ok,,155.7
+20261106-162159-765a,deepseek,failed,fail,,302.0
+20261106-162436-8cd4,openai,failed,fail,文件断言：storage.py 含任务数据写入文件的调用，含从文件读取任务数据的调用。 | 命令 `git diff --name-only` 的输出仅含 storage.py。,143.6
+20261106-162436-8cd4,deepseek,failed,fail,文件断言：storage.py 含任务数据写入文件的调用，含从文件读取任务数据的调用。 | 命令 `git diff --name-only` 的输出仅含 storage.py。,214.4

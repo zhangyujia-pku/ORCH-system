@@ -1,0 +1,39 @@
+```json
+{
+  "spec_md": "# 任务存储持久化\n## 要实现\n在 storage.py 中新增 _save()，将全部任务序列化写入该模块同目录的 tasks.json。\n每次成功的增、删、改操作完成后调用 _save()，覆盖保存当前完整任务集合。\n## 不能改\n不改 app.py、cli.py、README.md、requirements.txt 或现有测试文件。\n不将运行期生成的 tasks.json 纳入源码写集。\n不新增启动加载、接口变更或额外存储功能。\n## 已定的技术决策\n使用 Python 标准库 json 序列化。\n输出路径基于 storage.py 的文件位置确定，不依赖当前工作目录。\n保留现有公开接口和返回值约定。\n本次改动集中在一个模块，不拆分任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务写操作后的 JSON 持久化",
+      "reads": [
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 定义 _save()，使用标准库 json 将当前完整任务集合写入 JSON 文件。",
+        "文件断言：_save() 的输出路径由 storage.py 的 __file__ 所在目录与 tasks.json 文件名构成。",
+        "文件断言：storage.py 中每个成功执行增、删、改的分支均在内存状态更新后调用 _save()。",
+        "文件断言：_save() 使用覆盖写入方式，连续保存不会追加多个 JSON 文档。",
+        "运行 python -m pytest -q tests/test_app.py tests/test_cli.py，退出码为 0。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "README.md",
+        "requirements.txt",
+        "tests/**"
+      ],
+      "context_refs": [
+        "仅新增写后持久化，不新增启动加载。",
+        "tasks.json 是运行期输出，不属于源码写集。",
+        "保持现有公开接口和返回值约定。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

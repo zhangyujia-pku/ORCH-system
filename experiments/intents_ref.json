@@ -1,0 +1,99 @@
+{
+  "note": "控制长度、只改回指。每对前半段完全相同（先点名文件建立指代对象），全文只操纵两处二次提及：C 组重复文件名，R 组用『这个模块/它』。文本拉长到 100 字以上，把 12 字的替换差稀释到 10% 以内。",
+  "repo": "demo/tasks_app",
+  "levels": {
+    "C": "concrete：二次提及仍用文件名",
+    "R": "referential：二次提及改用指称词"
+  },
+  "cases": [
+    {
+      "id": "p01-C", "pair": "p01", "task": "persist", "level": "C",
+      "text": "storage.py 是任务存储模块，负责增删查改，数据现在只存在内存里。请在 storage.py 里加一个 _save()，并让 storage.py 在每次写操作之后调用它，把全部任务序列化写到同目录的 tasks.json。"
+    },
+    {
+      "id": "p01-R", "pair": "p01", "task": "persist", "level": "R",
+      "text": "storage.py 是任务存储模块，负责增删查改，数据现在只存在内存里。请在这个模块里加一个 _save()，并让它在每次写操作之后调用，把全部任务序列化写到同目录的 tasks.json 文件。"
+    },
+
+    {
+      "id": "p02-C", "pair": "p02", "task": "search", "level": "C",
+      "text": "storage.py 里存着全部任务对象，app.py 只负责把数据转成 JSON。请给 storage.py 加一个 search(keyword)，再让 app.py 调用 storage.py 的这个函数，把结果原样返回。"
+    },
+    {
+      "id": "p02-R", "pair": "p02", "task": "search", "level": "R",
+      "text": "storage.py 里存着全部任务对象，app.py 只负责把数据转成 JSON。请给它加一个 search(keyword)，再让 app.py 调用它的这个函数，把结果原样返回即可。"
+    },
+
+    {
+      "id": "p03-C", "pair": "p03", "task": "stats", "level": "C",
+      "text": "storage.py 维护着任务集合，里面每个任务都有 done 字段标记是否完成。请在 storage.py 加一个 stats()，返回 storage.py 里任务总数和已完成数，让 app.py 直接返回这个结果。"
+    },
+    {
+      "id": "p03-R", "pair": "p03", "task": "stats", "level": "R",
+      "text": "storage.py 维护着任务集合，里面每个任务都有 done 字段标记是否完成。请在它里面加一个 stats()，返回它里面任务总数和已完成数，让 app.py 直接返回这个结果。"
+    },
+
+    {
+      "id": "p04-C", "pair": "p04", "task": "export", "level": "C",
+      "text": "app.py 承载着全部 HTTP 路由，所有响应都在这里组装。请在 app.py 加一个 GET /tasks/export，由 app.py 读取 storage.py 里的任务列表，按 CSV 格式输出三列。"
+    },
+    {
+      "id": "p04-R", "pair": "p04", "task": "export", "level": "R",
+      "text": "app.py 承载着全部 HTTP 路由，所有响应都在这里组装。请在它里面加一个 GET /tasks/export，由它读取 storage.py 里的任务列表，按 CSV 的三列格式输出。"
+    },
+
+    {
+      "id": "p05-C", "pair": "p05", "task": "softdel", "level": "C",
+      "text": "storage.py 的 delete 现在直接用 pop 把记录移除了，删掉就找不回来。请把 storage.py 的 delete 改成只打标记，让 storage.py 保留这条记录但列表默认不显示它。"
+    },
+    {
+      "id": "p05-R", "pair": "p05", "task": "softdel", "level": "R",
+      "text": "storage.py 的 delete 现在直接用 pop 把记录移除了，删掉就找不回来。请把它的 delete 改成只打标记，让它保留这条记录但列表默认不显示它了。"
+    },
+
+    {
+      "id": "p06-C", "pair": "p06", "task": "priority", "level": "C",
+      "text": "storage.py 负责建任务和列出任务，目前按插入顺序返回。请让 storage.py 的 create 接受一个 priority 参数，并让 storage.py 的 list_all 按这个字段降序排列返回。"
+    },
+    {
+      "id": "p06-R", "pair": "p06", "task": "priority", "level": "R",
+      "text": "storage.py 负责建任务和列出任务，目前按插入顺序返回。请让它的 create 接受一个 priority 参数，并让它的 list_all 按这个字段降序排列之后返回。"
+    },
+
+    {
+      "id": "p07-C", "pair": "p07", "task": "verbose", "level": "C",
+      "text": "cli.py 是命令行入口，用 main(argv) 分发 list 和 add 两个子命令。请给 cli.py 加一个 --verbose 开关，让 cli.py 在每条命令执行完之后打印一次耗时。"
+    },
+    {
+      "id": "p07-R", "pair": "p07", "task": "verbose", "level": "R",
+      "text": "cli.py 是命令行入口，用 main(argv) 分发 list 和 add 两个子命令。请给它加一个 --verbose 开关，让它在每条命令执行完之后打印一次耗时出来。"
+    },
+
+    {
+      "id": "p08-C", "pair": "p08", "task": "paging", "level": "C",
+      "text": "app.py 暴露 GET /tasks，一次把所有任务都返回了，任务多了会很慢。请给 app.py 加上 limit 和 offset 两个查询参数，让 app.py 对列表做切片分页。"
+    },
+    {
+      "id": "p08-R", "pair": "p08", "task": "paging", "level": "R",
+      "text": "app.py 暴露 GET /tasks，一次把所有任务都返回了，任务多了会很慢。请给它加上 limit 和 offset 两个查询参数，让它对列表做切片分页再返回。"
+    },
+
+    {
+      "id": "p09-C", "pair": "p09", "task": "validate", "level": "C",
+      "text": "storage.py 的 create 现在直接接受 title，空字符串也会被存进去。请让 storage.py 的 create 先校验 title，为空时由 storage.py 抛出 ValueError 阻止写入。"
+    },
+    {
+      "id": "p09-R", "pair": "p09", "task": "validate", "level": "R",
+      "text": "storage.py 的 create 现在直接接受 title，空字符串也会被存进去。请让它的 create 先校验 title，为空时由它抛出一个 ValueError 阻止写入。"
+    },
+
+    {
+      "id": "p10-C", "pair": "p10", "task": "logging", "level": "C",
+      "text": "app.py 处理全部请求，但目前没有任何访问记录，出问题很难查。请在 app.py 加一个请求钩子，由 app.py 记录 app.py 收到的每个路径和响应状态码。"
+    },
+    {
+      "id": "p10-R", "pair": "p10", "task": "logging", "level": "R",
+      "text": "app.py 处理全部请求，但目前没有任何访问记录，出问题很难查。请在它里面加一个请求钩子，由它记录自己收到的每个路径和响应状态码。"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+[
+  {
+    "criterion": "文件断言：README.md 含 `运行方式` 这一节文字。",
+    "kind": "judge",
+    "ok": true,
+    "evidence": "README.md diff 新增文字：运行方式：`python app.py`。"
+  }
+]

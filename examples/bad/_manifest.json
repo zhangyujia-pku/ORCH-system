@@ -1,0 +1,94 @@
+[
+  {
+    "file": "e001_root_not_object.json",
+    "code": "E001"
+  },
+  {
+    "file": "e001_tasks_not_array.json",
+    "code": "E001"
+  },
+  {
+    "file": "e002_dup_id.json",
+    "code": "E002"
+  },
+  {
+    "file": "e003_missing_goal.json",
+    "code": "E003"
+  },
+  {
+    "file": "e004_unknown_field.json",
+    "code": "E004"
+  },
+  {
+    "file": "e005_deps_not_list.json",
+    "code": "E005"
+  },
+  {
+    "file": "e006_goal_empty.json",
+    "code": "E006"
+  },
+  {
+    "file": "e007_compound_goal.json",
+    "code": "E007"
+  },
+  {
+    "file": "e008_dep_missing.json",
+    "code": "E008"
+  },
+  {
+    "file": "e009_self_dep.json",
+    "code": "E009"
+  },
+  {
+    "file": "e010_cycle.json",
+    "code": "E010"
+  },
+  {
+    "file": "e011_empty_writes.json",
+    "code": "E011"
+  },
+  {
+    "file": "e012_empty_acceptance.json",
+    "code": "E012"
+  },
+  {
+    "file": "e013_overlap_exact.json",
+    "code": "E013"
+  },
+  {
+    "file": "e013_overlap_glob.json",
+    "code": "E013"
+  },
+  {
+    "file": "e014_vague.json",
+    "code": "E014"
+  },
+  {
+    "file": "e014_no_predicate.json",
+    "code": "E014"
+  },
+  {
+    "file": "e015_path_escape.json",
+    "code": "E015"
+  },
+  {
+    "file": "e016_forbidden_conflict.json",
+    "code": "E016"
+  },
+  {
+    "file": "e017_bad_budget.json",
+    "code": "E017"
+  },
+  {
+    "file": "e000_malformed.json",
+    "code": "E000"
+  },
+  {
+    "file": "e018_writes_too_broad.json",
+    "code": "E018"
+  },
+  {
+    "file": "e019_read_write_no_dep.json",
+    "code": "E019"
+  }
+]

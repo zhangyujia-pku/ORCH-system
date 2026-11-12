@@ -1,0 +1,63 @@
+diff --git a/cli.py b/cli.py
+index 9cc4d5c..b5de312 100644
+--- a/cli.py
++++ b/cli.py
+@@ -20,6 +20,20 @@ def main(argv):
+             return 2
+         print(storage.create(argv[1]))
+         return 0
++    if cmd == "rm":
++        if len(argv) < 2:
++            print("缺少 id")
++            return 2
++        try:
++            task_id = int(argv[1])
++        except ValueError:
++            print("不存在")
++            return 0
++        if storage.delete(task_id):
++            print("已删除")
++        else:
++            print("不存在")
++        return 0
+     print(f"未知命令: {cmd}")
+     return 2
+ 
+diff --git a/storage.py b/storage.py
+index e88bd7c..71ab744 100644
+--- a/storage.py
++++ b/storage.py
+@@ -27,4 +27,7 @@ def create(title):
+ 
+ 
+ def delete(task_id):
+-    return TASKS.pop(task_id, None)
++    if task_id in TASKS:
++        del TASKS[task_id]
++        return True
++    return False
+diff --git a/tests/test_cli.py b/tests/test_cli.py
+index a586933..a2b6776 100644
+--- a/tests/test_cli.py
++++ b/tests/test_cli.py
+@@ -10,3 +10,20 @@ def test_add_then_list(capsys):
+     assert main(["add", "写周报"]) == 0
+     assert main(["list"]) == 0
+     assert "写周报" in capsys.readouterr().out
++
++
++def test_delete_returns_bool():
++    t = storage.create("x")
++    assert storage.delete(t["id"]) is True
++    assert storage.delete(999) is False
++
++
++def test_rm_existing(capsys):
++    t = storage.create("x")
++    assert main(["rm", str(t["id"])]) == 0
++    assert capsys.readouterr().out.strip() == "已删除"
++
++
++def test_rm_missing(capsys):
++    assert main(["rm", "999"]) == 0
++    assert capsys.readouterr().out.strip() == "不存在"

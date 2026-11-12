@@ -1,0 +1,49 @@
+```json
+{
+  "spec_md": "# 任务优先级与排序\n## 要实现\n为任务增加优先级，任务列表按优先级从高到低排序。\n旧任务缺少优先级时仍须正常读取；同优先级保持原有相对顺序。\n创建任务时未指定优先级须保持兼容。\n完成后说明修改文件、行为变化与测试结果。\n## 不能改\n不改变与优先级无关的接口行为、存储字段或命令语义。\n不直接修改 tasks.json、缓存文件或依赖配置。\n## 已定的技术决策\n沿用现有 Python 实现和测试框架，不引入依赖。\n优先复用仓库中已记录的优先级约定。\n提供的上下文没有此前讨论的具体取值；仓库也无约定时，采用 high、medium、low，默认 medium。\n排序顺序为 high、medium、low，采用稳定排序。\n## 任务划分\n实现与兼容性验证紧密关联，合并为一个任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级排序",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "运行 `python -m pytest -q`，退出码为 0。",
+        "文件断言：测试覆盖创建任务时指定优先级、未指定时使用默认优先级、优先级持久化后重新读取，且断言通过。",
+        "文件断言：测试覆盖读取缺少优先级字段的旧任务，断言读取成功且按默认优先级参与排序。",
+        "文件断言：测试使用混合优先级任务，断言列表按约定从高到低排列，同优先级任务保持原有相对顺序。",
+        "文件断言：测试覆盖非法优先级输入，断言按现有错误处理方式拒绝且不写入任务。",
+        "文件断言：README.md 说明优先级取值、默认值、排序规则、兼容行为与修改文件，并记录实际执行的测试命令和结果。",
+        "运行 `git diff --name-only`，输出路径均属于 app.py、cli.py、storage.py、tests/test_app.py、tests/test_cli.py、README.md。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "仅增加任务优先级和对应排序，其他接口行为保持原样。",
+        "优先复用仓库已有约定；无约定时采用 high、medium、low，默认 medium。",
+        "旧任务缺少优先级时按默认值处理，同优先级稳定排序。",
+        "不引入第三方依赖，不直接修改运行期数据。"
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>增量记录：旧报告之后做了什么</title>
+<style>
+  @page { size: A4; }
+  * { box-sizing: border-box; }
+  body { font-family: "Source Han Serif SC","Songti SC","SimSun",serif;
+         font-size: 10.5pt; line-height: 1.75; color: #1a1a1a; margin: 0; }
+  h1,h2,h3 { font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif; }
+  h1 { font-size: 19pt; margin: 0 0 6pt; line-height: 1.35; }
+  h2 { font-size: 13pt; margin: 20pt 0 8pt; padding-bottom: 4pt;
+       border-bottom: 1.2pt solid #222; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 13pt 0 5pt; page-break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  .meta { color: #666; font-size: 9.5pt; margin: 0 0 3pt; }
+  .titleblock { border-top: 3pt solid #1a1a1a; padding-top: 13pt; margin-bottom: 14pt; }
+  .lead { font-size: 11.5pt; color: #333; margin: 0 0 8pt; }
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0 12pt; font-size: 9.5pt; }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  th,td { padding: 4pt 6pt; border-bottom: .6pt solid #d8d8d8; text-align: left; }
+  th { background: #f0f0ee; border-bottom: 1pt solid #999; font-weight: 700;
+       font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif; }
+  td.n,th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.total td { font-weight: 700; border-top: 1pt solid #999; }
+  code { font-family: "Cascadia Mono","Consolas",monospace; font-size: 9pt;
+         background: #f2f2f0; padding: 1pt 3pt; }
+  .callout { border: .8pt solid #1a1a1a; padding: 9pt 11pt; margin: 10pt 0;
+             page-break-inside: avoid; }
+  .callout .label { font-family: "Source Han Sans SC","Microsoft YaHei",sans-serif;
+                    font-size: 8.5pt; letter-spacing: 1pt; color: #666; margin-bottom: 4pt; }
+  .callout p:last-child { margin-bottom: 0; }
+  ul,ol { margin: 0 0 9pt; padding-left: 16pt; }
+  li { margin-bottom: 3pt; }
+  .small { font-size: 9pt; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <div class="meta" style="letter-spacing:1pt;">增量记录 · 接续 2026-11-06 报告</div>
+  <h1>从"规划会不会被拒"到"该派给哪个后端"</h1>
+  <p class="lead">2026 年 11 月 6 日晚 – 11 月 7 日 · 新增 88 次执行运行</p>
+  <p class="meta">changkong34@qq.com</p>
+</div>
+
+<p>上一版报告停在第四批（80 次规划运行），结论是"需求里给一个可锚定的东西就够了"。
+那之后做了三件事：<strong>把验收器补齐</strong>、<strong>把第二个后端接进来</strong>、
+<strong>用 88 次执行运行回答"换模型值不值"</strong>。本文只记增量，不重复旧结论。</p>
+
+<h2>一　先修工具，再谈结论</h2>
+
+<p>往执行阶段推的第一天，连续三次失败，<strong>全部出在验收器，没有一次是模型的问题</strong>。</p>
+
+<table>
+  <thead><tr><th style="width:34%">现象</th><th style="width:38%">真实原因</th><th>误导性</th></tr></thead>
+  <tbody>
+  <tr><td>任务 failed，判据全挂</td><td>判据写作 <code>命令 `pytest …` 退出码 0</code>，识别逻辑只认裸命令开头，被当成"断言型"交给模型，而模型看不到命令输出</td><td>看起来像 worker 没做对</td></tr>
+  <tr><td>判据"输出受 verbose 控制"判 FAIL</td><td>只给 diff，<code>if verbose:</code> 是三行上下文之一，看不出块结构</td><td>看起来像代码有问题</td></tr>
+  <tr><td><code>输出仅含 X</code> 必然 FAIL</td><td>只实现了"退出码 N"型，没有"命令+期望输出"型</td><td>看起来像 worker 多改了文件</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <div class="label">这次最值钱的一条经验</div>
+  <p><strong>验收器能力不足时，失败会伪装成"被验收者的错误"。</strong>
+  不逐条核对证据，这些都会被记进"模型成功率"，把系统缺陷算成模型差异。</p>
+</div>
+
+<p>对应的改动：命令判据兼容三种写法（裸命令 / 带 <code>命令 `…`</code> 前缀 / <code>运行：…</code>）；
+新增"命令+期望输出"型判据（<em>仅含 / 等于 / 含</em> 三种模式）；支持 <code>python -c</code> 形态。</p>
+
+<p>还有一个结构性问题值得单独记：最初"可判定"的判断只写在验收器里，契约层不认这种形态，
+于是出现<strong>校验说不可判定（E014 拒稿）、执行时却按另一套逻辑</strong>。
+现在两份定义合并到同一处——"可不可判定"和"怎么执行"必须共用一份规则。</p>
+
+<p class="small">测试从 57 涨到 122，代码 4,798 行。验收器的关键用例是"<code>cat a.txt b.txt</code> 必须判失败"，
+否则"仅含"形同虚设。</p>
+
+<h2>二　接入第二个后端</h2>
+
+<p>原计划是三家厂商异构，但实测只有一家能被程序调用：联想小天（GUI）与 DeepSeek Harness（GUI）
+都没有命令行入口，本地千问 1.7B 的权重用了私有量化格式，llama.cpp 读不了。</p>
+
+<p>真正打通的是 <strong>同一个 Codex 外壳换后端</strong>。关键发现是 DeepSeek 原生支持 Responses API，
+因此不需要协议转换、也不需要第三方切换工具：</p>
+
+<pre style="font-family:Consolas,monospace;font-size:8.6pt;background:#f6f6f4;
+padding:8pt 10pt;line-height:1.5;border-left:2pt solid #ccc;">
+-c model_provider=custom
+-c model_providers.custom.base_url=https://api.deepseek.com
+-c model_providers.custom.wire_api=responses
+-c model_providers.custom.env_key=DEEPSEEK_KEY
+-m deepseek-flash</pre>
+
+<p><strong>踩过的坑</strong>：第一版抄了图形化切换工具生成的配置，里面是 <code>requires_openai_auth=true</code>，
+Codex 会去读自己的登录态（OpenAI 的 token），DeepSeek 不认，返回 401。
+但报错里那句"your api key <code>****jHfg</code> is invalid"里的尾号，与我们真实的 key 尾号不一致——
+<strong>这个细节是唯一能区分"key 坏了"和"用错了 key"的线索</strong>。</p>
+
+<p class="small">另：原生模型 id 是 <code>deepseek-flash</code>，不是界面里显示的 <code>deepseek-v4.1-flash</code>，
+后者会被 API 直接拒绝。</p>
+
+<h2>三　换后端，质量上没有可测差异</h2>
+
+<p>三条中等难度任务（改响应结构 / 跨文件改语义 / 改排序），每条都要求读懂现有代码、改两处、测试保持绿。
+验收全部是确定性判据（<code>python -c</code> 断言行为 + <code>pytest</code> 回归），<strong>没有任何模型判分</strong>。
+每任务重复 6 遍。</p>
+
+<table>
+  <thead><tr><th style="width:26%">任务</th><th class="n">OpenAI 中位</th><th class="n">Pro 中位</th><th class="n">Flash 中位</th></tr></thead>
+  <tbody>
+  <tr><td>m1 响应改 <code>{"id": n}</code></td><td class="n">70s</td><td class="n">84s</td><td class="n">126s</td></tr>
+  <tr><td>m2 delete 布尔 + rm</td><td class="n">91s</td><td class="n">164s</td><td class="n">120s</td></tr>
+  <tr><td>m3 列表降序</td><td class="n">69s</td><td class="n">97s</td><td class="n">123s</td></tr>
+  <tr class="total"><td>总体（中位）</td><td class="n">73s</td><td class="n">122s</td><td class="n">120s</td></tr>
+  <tr><td>相对 OpenAI</td><td class="n">1.00×</td><td class="n">1.68×</td><td class="n">1.53×</td></tr>
+  <tr><td>通过率</td><td class="n">18/18</td><td class="n">17/18</td><td class="n">18/18</td></tr>
+  </tbody>
+</table>
+
+<p><strong>质量：三者都做对了。</strong>Pro 那一次失败是被机器休眠打断的（墙钟 31,451 秒），不计入能力。</p>
+
+<p><strong>速度：换成 DeepSeek 一定更慢，而且显著。</strong>
+Pro 与 OpenAI 配对 17 对，16 对更慢，符号检验 <strong>p = 0.00014</strong>；
+Flash 配对 18 对，14 对更慢，<strong>p = 0.015</strong>。换更轻的档位只把差距从 1.68 倍压到 1.53 倍。</p>
+
+<div class="callout">
+  <div class="label">一个必须写进局限的观察</div>
+  <p>两批的<strong>逐任务倍率互相反着</strong>：Pro 在 m2 最慢，Flash 在 m1 最慢，而 OpenAI 的基准两批都很稳。
+  这说明"任务 × 模型"的交互在 n=6 下极不稳定。<strong>只能信总体倍率，不能写"某模型擅长某类任务"。</strong></p>
+</div>
+
+<h2>四　成本：Flash 是 Pro 的四分之一</h2>
+
+<p>官网定价页抓不到（302 跳转 / 429 限流），只能实测。方法是读余额、跑 8 次真实任务、等结算、再读余额。</p>
+
+<table>
+  <thead><tr><th style="width:30%">后端</th><th class="n">次数</th><th class="n">通过</th><th class="n">总花费</th><th class="n">元 / 任务</th></tr></thead>
+  <tbody>
+  <tr><td>Codex + Flash</td><td class="n">8</td><td class="n">8/8</td><td class="n">¥0.31</td><td class="n">¥0.039</td></tr>
+  <tr><td>Codex + Pro</td><td class="n">8</td><td class="n">8/8</td><td class="n">¥1.24</td><td class="n">¥0.155</td></tr>
+  <tr class="total"><td>差额</td><td class="n">—</td><td class="n">—</td><td class="n">¥0.93</td><td class="n">4.0 倍</td></tr>
+  </tbody>
+</table>
+
+<p>余额 52.41 → 50.86 元，正好 ¥1.55，与两臂之和完全对上——账能对平，说明测法可信。</p>
+
+<h3>为什么放弃"先测单价再乘 token"</h3>
+
+<p>缓存价低到测不出来。116k token 的命中价约 0.02 元/百万，要凑出余额 0.01 元的变化得跑几千万 token。
+而<strong>任务成本本身就在 0.04–0.16 元量级，直接测它精度反而更好</strong>（误差约 2%）。</p>
+
+<h3>三个会把结论带偏的坑</h3>
+
+<ol>
+  <li><strong>余额是延迟批量入账的。</strong>调完立刻读是 <code>0.00</code>，实测滞后 1–2 分钟。
+      按"调用前后立即读数"测，会得出"免费"的荒谬结论。</li>
+  <li><strong>缓存污染冷启动测量。</strong>同一个 prompt 第二次起命中率 100%，测出来的是缓存价，不是标价。</li>
+  <li><strong>计费口径与耗时口径不能混批。</strong>成本那批的耗时（192s / 217s）明显高于对照批（120s / 122s），
+      因为没挂验收器、仓库状态也不同。<strong>耗时只信第六批，成本只信第七批。</strong></li>
+</ol>
+
+<h2>五　这两条线合起来说了什么</h2>
+
+<div class="callout">
+  <div class="label">结论</div>
+  <p><strong>DeepSeek 这条路选 Flash。</strong>质量与 Pro 同为满分，便宜 4 倍，还略快一点。
+  Pro 在这一档任务上没有任何理由存在。</p>
+  <p style="margin-top:6pt;"><strong>但换 DeepSeek 本身是有代价的选择</strong>：它比默认后端慢 1.5 倍。
+  省的是钱，不是时间。这个交换在"额度受限"时成立，在"延迟敏感"时不成立。</p>
+</div>
+
+<p>更重要的是对 Q2 的否定回答：<strong>换更强的模型没有换来质量</strong>。
+三条任务上两个后端都做对了，差异只在速度与成本。这意味着"按能力分派"在这类任务上没有可分的差异——
+而成本和延迟用配额规则就能算，不需要模型去判断。</p>
+
+<p>这与第一部分的结论构成一种对称：<strong>决定成败的是"判据能不能被机器核对"，不是"模型够不够强"。</strong>
+需求写得含糊，任何后端都会反复返工；需求写得可锚定，便宜的后端也能一次做对。</p>
+
+<h2>六　这些证据有多硬</h2>
+
+<p>把两条线的结论按证据强度排一下，避免把"方向一致"当成"已经证明"。</p>
+
+<table>
+  <thead><tr><th style="width:30%">结论</th><th style="width:44%">证据</th><th>强度</th></tr></thead>
+  <tbody>
+  <tr><td>需求详细程度呈 U 形</td><td>6 任务 × 5 档全平衡，每档 6 条，无单点例外</td><td>强</td></tr>
+  <tr><td>失败机制只有 E014</td><td>80 次规划、47 次拒稿，零其他错误码</td><td>强</td></tr>
+  <tr><td>锚点最优点在 1 个</td><td>24 次，0 vs 1 的符号检验 p = 0.031</td><td>中</td></tr>
+  <tr><td>换后端不损质量</td><td>3 任务 × 6 遍，两臂均满分；但有天花板效应</td><td>中</td></tr>
+  <tr><td>换后端慢 1.5–1.7 倍</td><td>35 对配对，16/17 与 14/18 同向，p 分别为 0.00014 与 0.015</td><td>强</td></tr>
+  <tr><td>Flash 比 Pro 便宜 4 倍</td><td>各 8 次，余额差 ¥0.31 / ¥1.24，账能对平</td><td>中</td></tr>
+  <tr><td>某模型擅长某类任务</td><td>两批倍率互相反着，n = 6 不稳定</td><td>不成立</td></tr>
+  </tbody>
+</table>
+
+<p class="small">"中"的共同原因是样本量：锚点实验 n = 8/档，成本实验各 8 次。
+方向可信，效应量的具体数值不可信——尤其不要引用"1.68 倍"这类精确到小数点的数字当结论。</p>
+
+<h2>七　下一步</h2>
+
+<ol>
+  <li><strong>加难度。</strong>当前存在明显的天花板效应（两边全过），测不出能力上限。
+      需要"改动跨三个文件 + 有隐含约束"的任务。</li>
+  <li><strong>补单价。</strong>本次只测了任务成本，没测单价；也没测 OpenAI 那条路的边际成本（订阅制，配额内为 0）。</li>
+  <li><strong>把"判据可执行性"做成检查项。</strong>那两类伪装成模型错误的失败目前没有规则覆盖，而它们都是可检测的。</li>
+</ol>
+
+<p class="small" style="margin-top:14pt;">
+数据：<code>experiments/results_medium6.csv</code>（Pro 36 次）、<code>results_flash6.csv</code>（Flash 36 次）、
+<code>experiments/cost/</code>（成本 16 次）。结论原文见 <code>experiments/FINDINGS.md</code> 第五至第七批。
+</p>
+
+</body>
+</html>

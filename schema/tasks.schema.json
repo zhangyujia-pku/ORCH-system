@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/orch/tasks.schema.json",
+  "title": "Task contract set",
+  "description": "Planner 的机器可读产物。人读的版本是 SPEC.md，两者必须同时存在。权威校验器是 orch/contract.py，本文件用于给模型当 prompt 约束、给编辑器做补全。",
+  "type": "object",
+  "required": ["tasks"],
+  "additionalProperties": false,
+  "properties": {
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/task" }
+    }
+  },
+  "$defs": {
+    "task": {
+      "type": "object",
+      "required": ["id", "goal", "writes", "acceptance"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "稳定标识，如 t03；trace / 返工 / 冲突都按它索引" },
+        "goal": { "type": "string", "description": "一句话，动词开头，单一动作；含'并且/然后/同时'视为复合任务" },
+        "deps": { "type": "array", "items": { "type": "string" }, "description": "前置任务 id，构成 DAG" },
+        "reads": { "type": "array", "items": { "type": "string" }, "description": "需要读的文件 glob，决定注入哪些上下文" },
+        "writes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "承诺要写的文件 glob。两个任务的写集重叠 = 必然冲突，发车前就会被拒"
+        },
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "验收判据，每条须可判定：测试命令 / 命令+期望输出 / 文件断言"
+        },
+        "forbidden": { "type": "array", "items": { "type": "string" }, "description": "禁改路径 / 禁用依赖" },
+        "context_refs": { "type": "array", "items": { "type": "string" }, "description": "必须继承的已定决策，对抗 handoff 处的预设丢失" },
+        "needs": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["web", "db", "docs", "net-exec"] },
+          "description": "外部能力需求。这是 worker 分配的唯一依据：能力不满足 = 该 worker 不可用，与价格无关",
+          "default": []
+        },
+        "inputs_from": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "读哪个任务的产物。比 deps 更具体：deps 说先后，它说读什么。chain 模式必填",
+          "default": []
+        },
+        "budget": { "type": "number", "exclusiveMinimum": 0, "default": 1.0, "description": "美元上限，用于熔断" }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务数量统计",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：tests/test_app.py 包含空任务列表、全部未完成、部分完成、全部完成四种统计场景，每种场景均断言任务总数与已完成数量的具体期望值。",
+        "测试命令：python -m pytest -q tests/test_app.py tests/test_cli.py，退出码等于 0。",
+        "命令：python -c \"import subprocess; paths = subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines(); assert set(paths) <= {'storage.py', 'app.py', 'tests/test_app.py'}, paths\"，退出码等于 0。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "README.md",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "统计任务总数与已完成数量，沿用此前已定方向。",
+        "沿用现有存储方式、任务完成状态定义和接口组织方式。",
+        "其他接口的行为保持原样不变。",
+        "完成后说明修改位置与内容，用户再次运行测试确认。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "在 cli.py 的 --help 输出里增加一行说明：--verbose 打印耗时。",
+      "writes": [
+        "cli.py"
+      ],
+      "reads": [],
+      "deps": [],
+      "acceptance": [
+        "命令 `python cli.py --help` 的输出含 `--verbose`。"
+      ]
+    }
+  ]
+}

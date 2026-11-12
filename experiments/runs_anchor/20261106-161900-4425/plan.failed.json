@@ -1,0 +1,11 @@
+{
+  "status": "fallback",
+  "reason": "计划在 3 次尝试内未通过校验，降级为单 agent 直接执行",
+  "attempts": [
+    {
+      "n": 1,
+      "codes": [],
+      "parse_error": "找不到可执行文件：<HOME>/AppData/Local/OpenAI/Codex/bin/a159911ff70742e9/codex.exe。确认它在 PATH 上，或用绝对路径 / 设 CODEX_BIN。"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码等于 0。",
+        "文件断言：tests/test_app.py 含软删除测试，断言删除后重新读取持久化内容时目标记录仍存在且 deleted 等于 True。",
+        "文件断言：tests/test_app.py 含默认列表测试，断言返回的记录 ID 不含已删除记录的 ID。",
+        "文件断言：tests/test_app.py 含历史记录兼容测试，断言默认列表返回的记录 ID 含未设置 deleted 字段的记录 ID。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "沿用现有存储格式。",
+        "使用 deleted 布尔字段标记删除状态。",
+        "缺少 deleted 字段的记录按未删除处理。",
+        "默认列表排除 deleted=true 的记录。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

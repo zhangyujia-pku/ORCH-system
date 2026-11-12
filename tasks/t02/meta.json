@@ -1,0 +1,9 @@
+{
+ "id": "t02",
+ "tier": "S",
+ "goal": "duration.py 的 parse_duration 漏了小时单位，修好它并保持原有行为，验收跑 python checks/check_duration.py",
+ "timeout_s": 900,
+ "accept": [
+  "python checks/check_duration.py"
+ ]
+}

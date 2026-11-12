@@ -1,0 +1,47 @@
+{
+  "_note": "token→金额换算用。订阅制拿不到账单，这里用该模型的公开 API 单价做等价换算，仅用于相对比较，不是实付。",
+  "_checked": "2026-11-10",
+  "models": {
+    "gpt-6.1-sol": {
+      "input_per_mtok": 2.0,
+      "cached_input_per_mtok": 0.1,
+      "output_per_mtok": 10.0,
+      "source": "OpenAI《GPT-6 系列模型指南》：输入 $2 / 缓存输入 $0.10 / 输出 $10（每百万 token）"
+    },
+    "deepseek-flash": {
+      "offpeak": {
+        "input_per_mtok": 0.15,
+        "cached_input_per_mtok": 0.003,
+        "output_per_mtok": 0.6
+      },
+      "peak": {
+        "input_per_mtok": 0.3,
+        "cached_input_per_mtok": 0.006,
+        "output_per_mtok": 1.2
+      },
+      "peak_utc_hours": [
+        [
+          1,
+          4
+        ],
+        [
+          6,
+          10
+        ]
+      ],
+      "source": "DeepSeek API 定价页：缓存未命中 $0.15/$0.30，缓存命中 $0.003/$0.006，输出 $0.60/$1.20（空闲/高峰，每百万 token）；高峰为 UTC 周一至周五 01–04、06–10"
+    },
+    "glm-5.3-flash": {
+      "input_per_mtok": 0.15,
+      "cached_input_per_mtok": 0.015,
+      "output_per_mtok": 0.5,
+      "_source": "智谱 GLM-5.3-Flash 公开价（据官方文档与第三方横评，输入 $0.15 / 输出 $0.50 每百万 tokens；缓存输入按 1/10 估）。待以帐单核实。"
+    },
+    "glm-5.3": {
+      "input_per_mtok": 0.6,
+      "cached_input_per_mtok": 0.06,
+      "output_per_mtok": 2.2,
+      "_source": "智谱 GLM-5.3 旗舰公开价（估：按 5.3-Flash 的 4 倍推算）。仅作相对比较，待核。"
+    }
+  }
+}

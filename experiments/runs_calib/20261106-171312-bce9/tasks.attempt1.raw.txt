@@ -1,0 +1,39 @@
+```json
+{
+  "spec_md": "# 任务标题搜索\n## 要实现\n在 storage.py 增加 search(keyword)，返回标题包含关键词的任务。\n在 app.py 增加 GET /tasks/search，通过查询参数 keyword 调用存储层搜索。\n补充匹配、无匹配、路由分发测试。\n## 不能改\n不修改 cli.py、requirements.txt、.gitignore 或运行期数据文件。\n保持现有任务接口行为。\n## 已定的技术决策\n沿用现有框架、存储格式和响应结构。\n使用区分大小写的字符串包含匹配；空关键词匹配全部任务。\n静态搜索路由不得被任务 ID 路由截获。\n存储函数、接口和验证存在顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务标题搜索功能",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 定义可调用的 search(keyword)，按任务标题执行区分大小写的子串匹配，返回匹配任务列表，无匹配返回空列表。",
+        "文件断言：app.py 注册 GET /tasks/search，从查询参数 keyword 获取关键词并调用 storage.search，响应沿用现有任务列表接口结构。",
+        "文件断言：tests/test_app.py 包含存储层标题子串匹配、无匹配、空关键词匹配全部、大小写区分的测试，包含 GET /tasks/search?keyword=关键词 的成功响应测试，验证请求不会落入任务 ID 路由。",
+        "命令：python -m pytest -q tests/test_app.py tests/test_cli.py；期望退出码为 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用现有框架、存储格式和响应结构。",
+        "标题搜索采用区分大小写的子串匹配，空关键词匹配全部任务。",
+        "GET /tasks/search 使用查询参数 keyword，静态路由优先于任务 ID 路由。"
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,7 @@
+﻿plan,arm,status,verify_ok,failures,seconds
+m1-response-id,openai,done,ok,,64.4
+m1-response-id,deepseek,done,ok,,92.6
+m2-delete-bool,openai,done,ok,,98.4
+m2-delete-bool,deepseek,done,ok,,119.8
+m3-sort-desc,openai,done,ok,,74.2
+m3-sort-desc,deepseek,done,ok,,123.6

@@ -1,0 +1,47 @@
+```json
+{
+  "spec_md": "# 任务数量统计\n## 要实现\n在 storage.py 中提供任务总数和已完成数量的统计能力。\n使用单个任务交付，统计实现与回归测试存在顺序依赖，不拆分。\n## 不能改\n保持其它公开接口的签名、返回值和行为不变。\n不修改 app.py、cli.py、现有测试、依赖或运行数据。\n## 已定的技术决策\n沿用现有存储方式及任务完成状态的判断约定，不引入依赖。\n优先沿用已有统计接口约定；若仓库没有约定，新增 get_task_stats()，返回包含 total、completed 两个整数的字典。\n统计操作只读取数据，不写回任务文件。\n完成后说明修改的文件和行为，报告测试结果，供用户复测。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "补齐任务数量统计能力",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_storage.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 提供统计入口，返回任务总数与已完成数量，完成状态判定沿用现有约定。",
+        "文件断言：tests/test_storage.py 包含空集合、全部未完成、全部完成、混合状态的统计测试，分别断言总数与已完成数量。",
+        "文件断言：tests/test_storage.py 使用隔离的临时存储或模拟数据，包含统计调用不改变存储内容的断言。",
+        "命令：python -m pytest -q tests/test_storage.py tests/test_app.py tests/test_cli.py，期望退出码为 0。",
+        "文件断言：相对于 git show HEAD:storage.py，已有公开接口的签名、返回值约定及行为保持一致。",
+        "文件断言：最终交付说明列出修改文件、统计入口及返回结构、实际执行的测试命令与结果。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "README.md",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "只增加任务总数与已完成数量统计，不扩展其它功能。",
+        "沿用现有存储方式与完成状态约定，不引入依赖。",
+        "无已有统计接口约定时使用 get_task_stats()，返回 total、completed 整数字段。",
+        "统计只读，所有现有接口行为保持原样。"
+      ]
+    }
+  ]
+}
+```

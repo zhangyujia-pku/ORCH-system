@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务优先级\n## 要实现什么\n给每个任务增加优先级，并按优先级排序。\n沿用此前已确定的优先级规则，不重新决定等级、默认值或排序方向。\n完成后说明修改了哪些地方。\n## 不能改什么\n仅修改优先级功能涉及的代码、测试和说明。\n其它接口的行为保持原样。\n不修改运行期数据 tasks.json、缓存或依赖配置。\n## 已定的技术决策\n沿用现有 Python 项目结构和存储方式。\n优先级的具体约定以已有讨论和仓库中的明确约定为准；缺失时需确认，不自行假定。\n该改动涉及存储、接口和命令行的顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级排序",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码 0。",
+        "文件断言：tests/test_app.py 和 tests/test_cli.py 包含任务优先级赋值、按约定优先级排序的测试。",
+        "文件断言：README.md 说明优先级规则、兼容行为和本次修改涉及的文件。",
+        "命令 `python -c \"import subprocess; allowed={'app.py','cli.py','storage.py','tests/test_app.py','tests/test_cli.py','README.md'}; changed=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()); assert changed.issubset(allowed), sorted(changed-allowed)\"` 退出码 0。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "沿用此前确定的优先级规则，不重新决定等级、默认值或排序方向。",
+        "其它接口的行为保持原样。",
+        "沿用现有 Python 项目结构和存储方式。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

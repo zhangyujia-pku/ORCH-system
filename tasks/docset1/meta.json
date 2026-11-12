@@ -1,0 +1,17 @@
+{
+ "id": "docset1",
+ "tier": "D",
+ "timeout_s": 1800,
+ "goal": "docs 下 6 份规格文档（api/store/auth/bill/notify/search 各一份）按 STYLE.md 修正：每份五个二级标题且顺序正确；条款编号 R-<CODE>-NN 在同文档内从 01 连续；每条条款必须含 输入/输出/错误码 三项；只用规定术语（接口/字段/返回码/租户，禁用 API、属性、错误编号、客户）；不得留 TODO 或占位符。六份文档共用一套编号空间。验收：依次跑 python checks/check_<域>.py 与 python checks/check_global.py，全部退出码 0。",
+ "accept": [
+  "python checks/check_api.py",
+  "python checks/check_store.py",
+  "python checks/check_auth.py",
+  "python checks/check_bill.py",
+  "python checks/check_notify.py",
+  "python checks/check_search.py",
+  "python checks/check_global.py"
+ ],
+ "batch_size": 6,
+ "kind": "文档规格（同构+全局一致）"
+}

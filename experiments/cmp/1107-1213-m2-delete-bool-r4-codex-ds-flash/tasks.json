@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "让 storage.delete 返回 True/False（不存在的 id 返回 False），并在 cli.py 增加 rm <id> 子命令：删除成功打印“已删除”，失败打印“不存在”。",
+      "writes": [
+        "storage.py",
+        "cli.py",
+        "tests/test_cli.py"
+      ],
+      "reads": [],
+      "deps": [],
+      "acceptance": [
+        "命令 `python -c \"import storage; storage.reset(); t=storage.create('x'); print(storage.delete(t['id']), storage.delete(999))\"` 的输出为 True False。",
+        "python -m pytest -q tests 退出码 0。"
+      ]
+    }
+  ]
+}

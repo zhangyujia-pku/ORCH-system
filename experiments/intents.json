@@ -1,0 +1,198 @@
+{
+  "note": "5 档详细程度 × 6 个任务。L1 最含糊（有指称、有模糊词、无锚点），L5 最具体（给命令、给禁改范围）。同一档位跨任务的写法保持一致，避免任务本身成为混杂变量。",
+  "repo": "demo/tasks_app",
+  "levels": {
+    "L1": "极含糊：只有目标，不提文件，不提验收",
+    "L2": "提到文件名，仍无验收",
+    "L3": "说清改哪里、做什么，但不给可执行命令",
+    "L4": "给出验收命令",
+    "L5": "验收命令 + 边界条件 + 禁改范围"
+  },
+  "cases": [
+    {
+      "id": "persist-L1",
+      "task": "persist",
+      "level": "L1",
+      "text": "帮我加个持久化，别每次重启都丢数据，做好一点。"
+    },
+    {
+      "id": "persist-L2",
+      "task": "persist",
+      "level": "L2",
+      "text": "给 storage.py 加持久化，把任务存到 tasks.json。"
+    },
+    {
+      "id": "persist-L3",
+      "task": "persist",
+      "level": "L3",
+      "text": "在 storage.py 加持久化：启动时从 tasks.json 读取，每次写操作后保存。"
+    },
+    {
+      "id": "persist-L4",
+      "task": "persist",
+      "level": "L4",
+      "text": "在 storage.py 加持久化，数据存到同目录的 tasks.json，UTF-8 编码，顶层为任务对象数组；验收：python -m pytest -q tests/test_app.py 退出码 0。"
+    },
+    {
+      "id": "persist-L5",
+      "task": "persist",
+      "level": "L5",
+      "text": "在 storage.py 加持久化，数据存到同目录的 tasks.json，UTF-8 编码，顶层为任务对象数组；文件不存在时用空列表，文件损坏时抛出异常且不覆盖原文件。验收：python -m pytest -q tests/test_app.py 退出码 0。不要改动 app.py 和 cli.py 的现有公开接口。"
+    },
+
+    {
+      "id": "search-L1",
+      "task": "search",
+      "level": "L1",
+      "text": "加个搜索，能用关键词找任务，体验好一点。"
+    },
+    {
+      "id": "search-L2",
+      "task": "search",
+      "level": "L2",
+      "text": "给这个项目加搜索功能，按任务标题搜。"
+    },
+    {
+      "id": "search-L3",
+      "task": "search",
+      "level": "L3",
+      "text": "在 storage.py 加 search(keyword) 返回标题含关键词的任务，在 app.py 加 GET /tasks/search 接口。"
+    },
+    {
+      "id": "search-L4",
+      "task": "search",
+      "level": "L4",
+      "text": "在 storage.py 加 search(keyword)，返回标题包含关键词的任务；在 app.py 加 GET /tasks/search?q= 接口返回 JSON 数组；验收：python -m pytest -q tests/test_search.py 退出码 0。"
+    },
+    {
+      "id": "search-L5",
+      "task": "search",
+      "level": "L5",
+      "text": "在 storage.py 加 search(keyword)，返回标题包含关键词的任务；在 app.py 加 GET /tasks/search?q= 返回 JSON 数组。关键字为空时返回全部，匹配不区分大小写。验收：python -m pytest -q tests/test_search.py 退出码 0。不要改动现有 GET /tasks 和 POST /tasks 的行为。"
+    },
+
+    {
+      "id": "stats-L1",
+      "task": "stats",
+      "level": "L1",
+      "text": "加个统计，看看有多少任务做完了。"
+    },
+    {
+      "id": "stats-L2",
+      "task": "stats",
+      "level": "L2",
+      "text": "加个统计接口，返回任务总数和已完成数。"
+    },
+    {
+      "id": "stats-L3",
+      "task": "stats",
+      "level": "L3",
+      "text": "在 storage.py 加 stats() 返回 total 和 done 两个数，在 app.py 加 GET /tasks/stats 接口。"
+    },
+    {
+      "id": "stats-L4",
+      "task": "stats",
+      "level": "L4",
+      "text": "在 storage.py 加 stats()，返回 {'total': n, 'done': m}；在 app.py 加 GET /tasks/stats 返回该 JSON；验收：python -m pytest -q tests/test_stats.py 退出码 0。"
+    },
+    {
+      "id": "stats-L5",
+      "task": "stats",
+      "level": "L5",
+      "text": "在 storage.py 加 stats()，返回 {'total': n, 'done': m}；在 app.py 加 GET /tasks/stats 返回该 JSON。任务列表为空时返回 total=0、done=0。验收：python -m pytest -q tests/test_stats.py 退出码 0。不要改动现有接口的响应字段。"
+    },
+
+    {
+      "id": "export-L1",
+      "task": "export",
+      "level": "L1",
+      "text": "能不能导出成表格？方便发给别人看。"
+    },
+    {
+      "id": "export-L2",
+      "task": "export",
+      "level": "L2",
+      "text": "加个导出 CSV 的功能，把任务导出成文件。"
+    },
+    {
+      "id": "export-L3",
+      "task": "export",
+      "level": "L3",
+      "text": "在 app.py 加 GET /tasks/export 接口，返回 CSV，包含 id、title、done 三列。"
+    },
+    {
+      "id": "export-L4",
+      "task": "export",
+      "level": "L4",
+      "text": "在 app.py 加 GET /tasks/export，返回 CSV，列的先后为 id,title,done，响应头 Content-Type 为 text/csv；验收：python -m pytest -q tests/test_export.py 退出码 0。"
+    },
+    {
+      "id": "export-L5",
+      "task": "export",
+      "level": "L5",
+      "text": "在 app.py 加 GET /tasks/export，返回 CSV，列为 id,title,done，响应头 Content-Type 为 text/csv。标题里含逗号或引号时按 CSV 规范加引号转义，中文按 UTF-8 输出。验收：python -m pytest -q tests/test_export.py 退出码 0。不要改变 GET /tasks 的 JSON 响应格式。"
+    },
+
+    {
+      "id": "softdel-L1",
+      "task": "softdel",
+      "level": "L1",
+      "text": "删掉的任务能不能恢复？现在删了就没了，不太合适。"
+    },
+    {
+      "id": "softdel-L2",
+      "task": "softdel",
+      "level": "L2",
+      "text": "把删除改成软删除，删掉的任务不要真的从数据里移除。"
+    },
+    {
+      "id": "softdel-L3",
+      "task": "softdel",
+      "level": "L3",
+      "text": "在 storage.py 给任务加 deleted 字段，delete 改成打标记；app.py 的 GET /tasks 默认不返回已删除的。"
+    },
+    {
+      "id": "softdel-L4",
+      "task": "softdel",
+      "level": "L4",
+      "text": "在 storage.py 的 delete 改为把 deleted 置为 True，不移除记录；在 app.py 让 GET /tasks 默认过滤掉 deleted，加 include_deleted=1 参数时全部返回；验收：python -m pytest -q tests/test_delete.py 退出码 0。"
+    },
+    {
+      "id": "softdel-L5",
+      "task": "softdel",
+      "level": "L5",
+      "text": "在 storage.py 的 delete 改为把 deleted 置为 True，不移除记录；在 app.py 让 GET /tasks 默认过滤掉 deleted，带 include_deleted=1 时全部返回。已删除的任务再次删除幂等，返回 200。验收：python -m pytest -q tests/test_delete.py 退出码 0。现有 GET/POST 的响应字段除新增 deleted 外保持不变，不得修改 tests/test_app.py 里的现有用例。"
+    },
+
+    {
+      "id": "priority-L1",
+      "task": "priority",
+      "level": "L1",
+      "text": "任务能不能排个优先级？重要的想放前面。"
+    },
+    {
+      "id": "priority-L2",
+      "task": "priority",
+      "level": "L2",
+      "text": "给任务加一个优先级字段，列表按优先级排序。"
+    },
+    {
+      "id": "priority-L3",
+      "task": "priority",
+      "level": "L3",
+      "text": "在 storage.py 建任务时接受 priority 参数，list_all 按 priority 从高到低返回。"
+    },
+    {
+      "id": "priority-L4",
+      "task": "priority",
+      "level": "L4",
+      "text": "在 storage.py 的 create 接受 priority（整数，默认 0），list_all 按 priority 降序、同优先级按 id 升序返回；验收：python -m pytest -q tests/test_priority.py 退出码 0。"
+    },
+    {
+      "id": "priority-L5",
+      "task": "priority",
+      "level": "L5",
+      "text": "在 storage.py 的 create 接受 priority（整数，默认 0），list_all 按 priority 降序、同优先级按 id 升序返回。priority 不是整数时返回 400 且不创建任务。验收：python -m pytest -q tests/test_priority.py 退出码 0。不要改动 POST /tasks 现有响应字段的含义。"
+    }
+  ]
+}

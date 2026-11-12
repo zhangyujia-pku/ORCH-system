@@ -1,0 +1,39 @@
+```json
+{
+  "spec_md": "# GET /tasks 切片分页\n## 要实现\n为 app.py 的 GET /tasks 增加 limit、offset 查询参数，对任务列表执行切片。\n补充分页测试。\n## 不能改\n不修改 cli.py、storage.py、持久化格式或其他接口。\n不新增分页元数据，不改变现有响应结构或任务顺序。\n## 已定的技术决策\n沿用现有框架与测试工具，不新增依赖。\noffset 默认 0；未传 limit 时返回 offset 之后的全部任务。\nlimit、offset 必须是非负整数，非法值返回 HTTP 400；limit=0 返回空列表。\n分页在 app.py 中完成，不下推至存储层。\n实现与测试存在依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表切片分页",
+      "reads": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py",
+        "requirements.txt"
+      ],
+      "writes": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码为 0。",
+        "文件断言：tests/test_app.py 包含使用确定任务列表的测试，断言未传参数时返回完整列表，limit=2 时返回前两项，offset=2 时返回第三项起的全部任务，limit=2&offset=1 时返回第二、三项。",
+        "文件断言：tests/test_app.py 包含测试，断言 limit=0 与 offset 超出列表长度时均返回空列表，分页响应结构与现有列表响应结构一致。",
+        "文件断言：tests/test_app.py 包含测试，分别断言 limit、offset 传入负数、非整数文本或小数时返回 HTTP 400。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "storage.py",
+        "requirements.txt",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "在 app.py 中对列表切片，保持任务顺序和响应结构。",
+        "offset 默认 0，limit 缺省表示不限制返回数量。",
+        "limit、offset 仅接受非负整数，非法值返回 HTTP 400。",
+        "沿用现有框架与测试工具，不新增依赖。"
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,8 @@
+[
+  {
+    "criterion": "文件断言：storage.py 含 `# storage v2`。",
+    "kind": "judge",
+    "ok": true,
+    "evidence": "storage.py:1，diff 新增 `# storage v2`。"
+  }
+]

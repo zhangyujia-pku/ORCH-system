@@ -1,0 +1,40 @@
+```json
+{
+  "spec_md": "# 任务关键词筛选\n## 要实现\n在 storage.py 中支持按关键词筛选任务，由 app.py 传递可选关键词。\n未提供关键词时保持现有行为。\n补充关键词筛选回归测试，完成后说明修改位置。\n## 不能改\n除 storage.py、app.py、tests/test_app.py 外的文件。\n其它接口的行为。\n## 已定的技术决策\n沿用现有架构与此前讨论的筛选方向，不重新设计其它部分。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词筛选",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py -k keyword` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "命令 `python -c \"import subprocess; paths=subprocess.check_output(['git','diff','HEAD','--name-only'],text=True).splitlines(); assert set(paths).issubset({'storage.py','app.py','tests/test_app.py'}), paths\"` 退出码等于 0。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "tests/test_cli.py",
+        "requirements.txt",
+        "README.md",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "沿用此前讨论的关键词筛选方向。",
+        "未提供关键词时保持现有行为。",
+        "其它接口的行为保持原样。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

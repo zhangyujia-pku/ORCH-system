@@ -1,0 +1,46 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词筛选",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "README.md",
+        "requirements.txt",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q` 退出码为 0。",
+        "文件断言：`tests/test_app.py` 或 `tests/test_cli.py` 包含 `test_keyword_filter_matches`，断言关键词匹配时仅返回符合关键词和原查询条件的任务。",
+        "文件断言：`tests/test_app.py` 或 `tests/test_cli.py` 包含 `test_keyword_filter_no_matches`，断言无匹配关键词返回空任务列表。",
+        "文件断言：`tests/test_app.py` 或 `tests/test_cli.py` 包含 `test_keyword_filter_omitted` 和 `test_keyword_filter_empty`，分别断言未提供关键词和关键词为 `\"\"` 时返回全部符合原查询条件的任务。",
+        "文件断言：`README.md` 包含关键词筛选的用法、实际修改文件列表和测试命令 `python -m pytest -q`。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "沿用现有 Python 项目结构、查询入口和存储方式。",
+        "其他接口行为保持原样，不修改无关功能。",
+        "关键词匹配规则遵循仓库已有明确约定，不推定未提供的上一轮讨论结论。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+```json
+{
+  "spec_md": "# 任务优先级与排序\n## 要实现什么\n给任务增加优先级，支持创建时指定、默认值、持久化与按优先级排序。\n兼容缺少优先级字段的旧任务，同优先级保持原有相对顺序。\n拒绝非法优先级输入，不写入任务。\n补充测试与 README 修改说明，记录实际测试命令和结果。\n## 不能改什么\n不改变其它接口的既有行为，不扩展无关功能。\n不修改运行期数据、依赖文件、缓存与忽略规则。\n## 已定的技术决策\n沿用此前约定的优先级取值、默认值与从高到低的排序规则。\n沿用现有存储结构与错误处理方式。\n本改动涉及接口、存储与兼容行为的顺序依赖，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级功能",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py::test_create_task_with_priority tests/test_app.py::test_create_task_default_priority tests/test_app.py::test_priority_persistence` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py::test_legacy_task_default_priority` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py::test_priority_sort_descending tests/test_app.py::test_equal_priority_stable_order` 退出码等于 0。",
+        "命令 `python -m pytest -q tests/test_app.py::test_invalid_priority_rejected_without_write` 退出码等于 0。",
+        "文件断言：`README.md` 含 `优先级取值`、`默认值`、`排序规则`、`兼容行为`、`修改文件`、`测试命令`、`测试结果`。",
+        "命令 `git diff --name-only` 的输出路径集合是 `app.py`、`cli.py`、`storage.py`、`tests/test_app.py`、`tests/test_cli.py`、`README.md` 构成集合的子集。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "沿用此前约定的优先级取值、默认值与从高到低的排序规则",
+        "同优先级任务保持原有相对顺序",
+        "缺少优先级字段的旧任务使用默认优先级",
+        "其它接口行为保持原样",
+        "沿用现有错误处理方式"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

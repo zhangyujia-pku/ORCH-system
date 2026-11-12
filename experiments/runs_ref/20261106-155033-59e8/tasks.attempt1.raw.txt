@@ -1,0 +1,23 @@
+```json
+{
+  "spec_md": "# create 空标题校验\n## 要实现\n在 storage.py 的 create 中校验 title；title 为 \"\" 时抛出 ValueError，阻止写入。\n## 不能改\n不修改 app.py、cli.py、现有测试、依赖或运行期数据文件。\n## 已定的技术决策\n校验放在 storage.py 的 create 内，在任何写入操作之前执行。\n使用 Python 内置 ValueError；非空标题保持现有处理逻辑。\n本需求是单文件改动，不拆分任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "添加 create 的空标题校验",
+      "reads": ["storage.py", "tests/test_app.py", "tests/test_cli.py"],
+      "writes": ["storage.py"],
+      "acceptance": [
+        "文件断言：storage.py 的 create 在 title == \"\" 时抛出 ValueError，校验位于所有数据修改和写入操作之前。",
+        "文件断言：storage.py 的 create 对非空 title 继续执行现有创建逻辑。",
+        "运行 python -m pytest -q tests/test_app.py tests/test_cli.py，退出码为 0。"
+      ],
+      "forbidden": ["app.py", "cli.py", "tests/**", "requirements.txt", "tasks.json"],
+      "context_refs": [
+        "空标题指空字符串 \"\"，不新增去除空白或类型校验规则。",
+        "由 storage.py 的 create 抛出内置 ValueError。"
+      ]
+    }
+  ]
+}
+```

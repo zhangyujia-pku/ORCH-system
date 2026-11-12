@@ -1,0 +1,30 @@
+{
+  "frozen_at": "2026-11-10T23:00:15",
+  "version": "taskset-v1",
+  "total_hash": "bb77d7058735bc0da78ac0c0289ddebdcdbad01fef65d451e92ff2a81753c90b",
+  "tasks": {
+    "b1": "b14c080e4afd47abcbb2e733251809af194e9470a69df0b8a63bc74c38175646",
+    "b2": "65e1afdc3d5640845de2dfc3df36d6ea9ef4f7f07b0774319f88e69d2986dbe6",
+    "b3": "569063a3698a23c6ca81a1f630d9cfc3dac68e4f4556f769e11539397d47f56e"
+  },
+  "counts": {
+    "b1": {
+      "files": 42,
+      "accept": 10,
+      "batch_size": 10
+    },
+    "b2": {
+      "files": 52,
+      "accept": 12,
+      "batch_size": 12
+    },
+    "b3": {
+      "files": 34,
+      "accept": 8,
+      "batch_size": 8
+    }
+  },
+  "codex": "codex-cli 0.167.0-alpha.3.2",
+  "orch": "v1.9.4-13-g6c8b599",
+  "rule": "冻结后任何文件改动都必须升 version，并声明旧数据作废。"
+}

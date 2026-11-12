@@ -1,0 +1,38 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表 CSV 导出接口",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py",
+        "requirements.txt"
+      ],
+      "writes": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：app.py 注册 GET /tasks/export，通过 storage.py 现有读取接口获取任务，使用标准库 csv 生成 UTF-8 CSV 响应，Content-Type 的媒体类型为 text/csv。",
+        "文件断言：tests/test_app.py 包含导出测试，使用受控存储结果断言响应状态码为 200，CSV 表头依次表示任务 ID、标题、完成状态，每行恰有三列，数据与存储返回结果及顺序一致。",
+        "文件断言：tests/test_app.py 包含空列表测试，断言 CSV 解析结果仅包含三列表头。",
+        "文件断言：tests/test_app.py 包含标题含中文、逗号、双引号及换行的测试，使用 csv.reader 解析响应后标题与原值一致。",
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码为 0。"
+      ],
+      "forbidden": [
+        "storage.py",
+        "cli.py",
+        "tasks.json",
+        "requirements.txt"
+      ],
+      "context_refs": [
+        "所有 HTTP 路由及响应组装保留在 app.py。",
+        "CSV 列顺序为任务 ID、标题、完成状态，字段映射沿用现有任务模型。",
+        "导出使用现有存储读取接口，不改变任务数据格式。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

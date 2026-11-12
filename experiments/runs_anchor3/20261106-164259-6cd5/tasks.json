@@ -1,0 +1,51 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "执行 `python -m pytest -q tests/test_app.py tests/test_cli.py`，退出码为 0。",
+        "文件断言：`tests/test_app.py` 中存在 `test_soft_delete_preserves_record`，断言删除后持久化记录仍包含原任务 ID、原始业务字段和已置位的内部删除标记。",
+        "执行 `python -m pytest -q tests/test_app.py::test_soft_delete_preserves_record`，退出码为 0。",
+        "文件断言：`tests/test_app.py` 中存在 `test_legacy_record_visibility` 和 `test_deleted_record_visibility`，分别包含无删除标记记录的列表与单条访问响应断言、已删除记录的列表与单条访问响应断言；预期值以 `git show HEAD:app.py` 中对应接口的状态码与响应结构为依据。",
+        "执行 `python -m pytest -q tests/test_app.py::test_legacy_record_visibility tests/test_app.py::test_deleted_record_visibility`，退出码为 0。",
+        "文件断言：`tests/test_app.py` 中存在 `test_repeated_delete` 和 `test_delete_missing_task`，分别断言重复删除与删除不存在 ID 的状态码和响应体；预期值以 `git show HEAD:app.py` 中对应删除分支为依据。",
+        "执行 `python -m pytest -q tests/test_app.py::test_repeated_delete tests/test_app.py::test_delete_missing_task`，退出码为 0。",
+        "文件断言：`tests/test_app.py` 中存在 `test_internal_delete_marker_hidden`，断言创建、列表、单条查询和更新响应中的任务字段集合不包含 `storage.py` 使用的内部删除标记字段。",
+        "执行 `python -m pytest -q tests/test_app.py::test_internal_delete_marker_hidden`，退出码为 0。",
+        "文件断言：`README.md` 包含软删除说明、修改文件清单和回归测试命令。"
+      ],
+      "forbidden": [
+        ".gitignore",
+        "requirements.txt",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "删除仅做内部标记，原始记录持久化保留。",
+        "没有删除标记的历史记录视为未删除。",
+        "其它接口行为保持原样，内部删除标记不对外暴露。",
+        "交付时说明修改的文件与行为。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

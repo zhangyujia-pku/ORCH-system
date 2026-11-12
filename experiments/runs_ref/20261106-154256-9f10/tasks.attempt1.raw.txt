@@ -1,0 +1,38 @@
+```json
+{
+  "spec_md": "# 任务软删除\n## 要实现\n将 storage.py 的 delete 改为软删除：保留记录，设置删除标记，默认列表过滤已删除记录。\n补充持久化与列表过滤的回归测试。\n## 不能改\n不增加恢复接口，不改 CLI 或应用接口，不提交运行数据 tasks.json。\n## 已定的技术决策\n沿用现有存储格式与公开函数签名。\n使用 deleted 布尔字段标记删除；旧记录缺少该字段时视为未删除。\n保持现有删除操作的返回值约定与不存在记录的处理方式。\n本需求属于同一存储行为改动，作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码为 0。",
+        "文件断言：storage.py 的 delete 保留目标记录并持久化 deleted=true，默认列表排除 deleted=true 的记录。",
+        "文件断言：tests/test_app.py 包含使用临时存储的回归测试，断言删除后持久化记录仍存在、删除标记为 true、重新读取默认列表不包含该记录。",
+        "文件断言：tests/test_app.py 包含兼容性测试，断言缺少 deleted 字段的旧记录与 deleted=false 的记录出现在默认列表中。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "沿用现有存储格式与公开函数签名。",
+        "deleted=true 表示已删除，缺少 deleted 字段视为未删除。",
+        "保持删除操作现有返回值约定与不存在记录的处理方式。"
+      ]
+    }
+  ]
+}
+```

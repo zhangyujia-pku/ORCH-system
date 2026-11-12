@@ -1,0 +1,49 @@
+```json
+{
+  "spec_md": "# 导出任务列表\n## 要实现\n将任务列表导出为表格文件，补充回归测试和使用说明。\n当前输入未提供此前讨论的具体格式、字段或入口；实施前先检查仓库代码与 README.md 中已有约定，有明确约定时沿用。\n若仓库没有相关约定，采用 CSV、UTF-8 BOM 编码，字段使用现有任务公开字段，顺序沿用任务列表顺序。\n导出入口沿用现有应用结构，具体使用方式记录到 README.md。\n空列表导出仅含表头；字段中的逗号、引号和换行必须正确转义。\n## 不能改\n其它接口的行为、现有任务存储结构、依赖配置。\n不得将运行期数据、缓存或导出产物纳入源码修改。\n## 已定的技术决策\n优先复用现有列表读取逻辑；导出操作不得修改任务数据。\n实现、测试和文档存在顺序依赖，合并为一个任务。\n交付说明必须列出实际修改的文件和测试结果。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表表格导出功能",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "requirements.txt",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "`python -m pytest -q` 退出码为 0。",
+        "文件断言：tests/test_app.py 或 tests/test_cli.py 包含可执行的导出测试，覆盖空列表、多条任务、中文、包含逗号/引号/换行的字段，断言解析后的表格字段值与任务字段值一致。",
+        "文件断言：导出测试包含导出前后任务存储内容相同的断言。",
+        "文件断言：README.md 记录最终采用的文件格式、编码、字段和可直接执行的导出示例。",
+        "文件断言：相对于 `git show HEAD:tests/test_app.py` 和 `git show HEAD:tests/test_cli.py`，现有测试函数及其断言均保留。",
+        "文件断言：最终交付说明列出实际修改文件、每个文件的改动用途和执行的测试结果。"
+      ],
+      "forbidden": [
+        "storage.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "仅增加任务列表导出能力，其它接口行为保持原样。",
+        "此前讨论的细节未包含在输入中，不得声称某种格式已获确认；优先遵循仓库已有明确约定，无约定时使用 CSV 和 UTF-8 BOM。",
+        "使用现有依赖和 Python 标准库。",
+        "运行期导出文件不属于 writes。"
+      ]
+    }
+  ]
+}
+```

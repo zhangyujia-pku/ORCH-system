@@ -1,0 +1,72 @@
+diff --git a/cli.py b/cli.py
+index 9cc4d5c..d075407 100644
+--- a/cli.py
++++ b/cli.py
+@@ -20,6 +20,17 @@ def main(argv):
+             return 2
+         print(storage.create(argv[1]))
+         return 0
++    if cmd == "rm":
++        if len(argv) < 2:
++            print("缺少 id")
++            return 2
++        try:
++            task_id = int(argv[1])
++        except ValueError:
++            print("无效 id")
++            return 2
++        print("已删除" if storage.delete(task_id) else "不存在")
++        return 0
+     print(f"未知命令: {cmd}")
+     return 2
+ 
+diff --git a/storage.py b/storage.py
+index e88bd7c..2c7e996 100644
+--- a/storage.py
++++ b/storage.py
+@@ -27,4 +27,4 @@ def create(title):
+ 
+ 
+ def delete(task_id):
+-    return TASKS.pop(task_id, None)
++    return TASKS.pop(task_id, None) is not None
+diff --git a/tests/test_cli.py b/tests/test_cli.py
+index a586933..298a9b3 100644
+--- a/tests/test_cli.py
++++ b/tests/test_cli.py
+@@ -6,6 +6,35 @@ def setup_function():
+     storage.reset()
+ 
+ 
++def test_delete_returns_bool():
++    task = storage.create("x")
++    assert storage.delete(task["id"]) is True
++    assert storage.delete(task["id"]) is False
++    assert storage.delete(999) is False
++
++
++def test_rm_existing_task(capsys):
++    task = storage.create("x")
++    assert main(["rm", str(task["id"])]) == 0
++    assert capsys.readouterr().out == "已删除\n"
++    assert storage.get(task["id"]) is None
++
++
++def test_rm_missing_task(capsys):
++    assert main(["rm", "999"]) == 0
++    assert capsys.readouterr().out == "不存在\n"
++
++
++def test_rm_missing_id(capsys):
++    assert main(["rm"]) == 2
++    assert capsys.readouterr().out == "缺少 id\n"
++
++
++def test_rm_invalid_id(capsys):
++    assert main(["rm", "invalid"]) == 2
++    assert capsys.readouterr().out == "无效 id\n"
++
++
+ def test_add_then_list(capsys):
+     assert main(["add", "写周报"]) == 0
+     assert main(["list"]) == 0

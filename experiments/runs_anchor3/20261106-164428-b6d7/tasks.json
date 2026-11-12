@@ -1,0 +1,42 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 包含使用临时存储的软删除测试，断言删除后持久化原始记录仍存在、原始业务字段保留、删除标记已设置。",
+        "文件断言：tests/test_app.py 包含删除后公开接口行为测试，断言已删除任务的查询、列表、更新及重复删除结果符合现有接口约定。",
+        "文件断言：tests/test_app.py 包含旧记录兼容测试，断言不含删除标记的记录仍可正常读取和操作。",
+        "文件断言：storage.py 保持现有公开函数的名称、参数和返回结构，删除标记不出现在现有公开接口返回的任务字段中。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        ".gitignore",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "删除仅设置内部标记，原始记录仍保留。",
+        "其它接口行为保持原样，不扩展公开接口。",
+        "沿用现有存储方式，兼容无删除标记的记录。",
+        "完成后说明修改位置与验证结果，供用户复测。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

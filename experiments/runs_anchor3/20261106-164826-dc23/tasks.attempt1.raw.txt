@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务优先级\n## 要实现\n仅为 storage.py 中的任务增加优先级支持，使任务列表按优先级从高到低返回。\n沿用仓库中已有的优先级约定；本次输入未提供此前讨论的具体取值，不得宣称这些取值已经确定。\n兼容未携带优先级的调用和历史任务数据，同优先级任务保持原有相对顺序。\n## 不能改\n不修改 app.py、cli.py、requirements.txt 或其它接口的既有行为。\n不将 tasks.json、日志或缓存纳入源码修改。\n不进行无关重构。\n## 已定的技术决策\n在现有 Python 存储模块内实现，沿用现有存储格式和测试框架。\n优先级之外的字段、返回结构和异常行为保持兼容。\n交付时列出实际修改文件及行为变化，说明测试执行结果。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务优先级支持",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "README.md",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 包含优先级持久化、优先级从高到低排序、同优先级保持原有相对顺序的测试。",
+        "文件断言：tests/test_app.py 包含未传优先级的既有调用、缺少优先级字段的历史数据仍可正常读取的测试。",
+        "文件断言：storage.py 的优先级取值、默认值和排序规则有明确说明；优先级之外的公开接口签名与 git show HEAD:storage.py 一致。",
+        "文件断言：git diff --name-only 输出的每个路径均属于 storage.py 或 tests/test_app.py。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "tasks.json",
+        ".gitignore",
+        "README.md",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "本需求属于单一存储行为改动，实现和回归测试合并为一个任务。",
+        "沿用已有优先级约定，不重新设计其它接口。",
+        "保持旧调用与历史数据兼容。",
+        "完成后报告修改位置和测试结果。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

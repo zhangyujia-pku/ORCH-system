@@ -1,0 +1,47 @@
+```json
+{
+  "spec_md": "# 任务列表分页\n## 要实现\n为任务列表增加分页，一次只返回部分任务。\n分页参数、默认值、合法范围、响应结构和兼容行为沿用上一轮已确认的约定；当前输入未提供具体约定，不得自行重新决定。\n完成后说明修改的文件和行为。\n## 不能改\n其它接口的行为保持原样，不引入无关改动。\n不修改运行期数据 tasks.json。\n## 已定的技术决策\n沿用现有 Python 项目结构和测试方式。\n分页实现、回归测试和说明作为一个任务交付。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表分页",
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "README.md",
+        "requirements.txt",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 含分页首批、后续批次、超出列表范围、非法分页参数和未传分页参数的测试用例。",
+        "文件断言：README.md 含「分页参数」「默认值」「合法范围」「响应结构」「不传分页参数时的行为」五个条目，每个条目含对应的具体约定。",
+        "文件断言：README.md 含「修改文件」条目，该条目列出本次修改的文件路径。",
+        "命令 `git diff --name-only -- cli.py tests/test_cli.py requirements.txt .gitignore` 输出为空。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "tests/test_cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "沿用上一轮已确认的分页约定；具体内容未包含在当前输入中，执行前须从已有讨论恢复，不得自行重新决定。",
+        "其它接口的行为保持原样。",
+        "仅修正上一轮被拒的 README.md 文件断言，使其具有可判定的「含」谓词。"
+      ]
+    }
+  ]
+}
+```

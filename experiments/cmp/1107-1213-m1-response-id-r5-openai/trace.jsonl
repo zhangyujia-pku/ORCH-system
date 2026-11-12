@@ -1,0 +1,7 @@
+{"event": "run.start", "ts": "2026-11-07T12:25:07+08:00", "session": 1, "data": {"run_id": "1107-1213-m1-response-id-r5-openai", "base": "681a24282058500003ac672f0ef807c22ae3f146", "n_tasks": 1, "layers": [["t01"]], "max_agents": 1, "worker": "codex-openai", "verifier": "codex-openai"}}
+{"event": "layer.start", "ts": "2026-11-07T12:25:07+08:00", "session": 1, "data": {"layer": 0, "tasks": ["t01"]}}
+{"event": "task.start", "ts": "2026-11-07T12:25:09+08:00", "session": 1, "data": {"task_id": "t01", "branch": "orch/1107-1213-m1-response-id-r5-openai/t01-a1", "worktree": "<HOME>\\WorkBuddy\\agent协同项目\\orchestrator\\experiments\\cmp\\1107-1213-m1-response-id-r5-openai\\wt\\t01-a1", "provider": "codex-openai"}}
+{"event": "task.committed", "ts": "2026-11-07T12:26:15+08:00", "session": 1, "data": {"task_id": "t01", "changed": ["app.py", "tests/test_app.py"]}}
+{"event": "task.verify", "ts": "2026-11-07T12:26:18+08:00", "session": 1, "data": {"task_id": "t01", "ok": true, "failed": []}}
+{"event": "merge.result", "ts": "2026-11-07T12:26:19+08:00", "session": 1, "data": {"target": "orch/run-1107-1213-m1-response-id-r5-openai", "results": [{"branch": "orch/1107-1213-m1-response-id-r5-openai/t01-a1", "ok": true, "detail": ""}]}}
+{"event": "run.end", "ts": "2026-11-07T12:26:19+08:00", "session": 1, "data": {"ok": true, "done": 1, "total": 1, "merged": "orch/run-1107-1213-m1-response-id-r5-openai"}}

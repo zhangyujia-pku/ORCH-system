@@ -1,0 +1,45 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "补全创建任务的非空标题校验",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md",
+        "requirements.txt"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码等于 0。",
+        "文件断言：tests/test_app.py 和 tests/test_cli.py 各自含测试断言：创建入口收到空字符串标题或纯空白标题时返回现有约定的失败结果，调用后任务数量等于调用前任务数量。",
+        "文件断言：tests/test_app.py 和 tests/test_cli.py 各自含测试断言：有效标题创建成功，保存的标题等于输入标题，含首尾空白的非空标题保存后仍等于输入标题。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        ".gitignore",
+        "requirements.txt",
+        "README.md",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "仅校验创建任务时的标题，拒绝空字符串和纯空白字符串。",
+        "沿用现有错误处理约定，其它接口行为保持原样。",
+        "有效标题内容保持原样，不执行裁剪。",
+        "完成后说明实际修改的文件和内容。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

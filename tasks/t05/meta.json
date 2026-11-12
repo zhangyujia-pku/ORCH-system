@@ -1,0 +1,12 @@
+{
+ "id": "t05",
+ "tier": "M",
+ "goal": "tests/test_more.py 里有若干测试失败。修好它们，不要修改 tests/test_more.py，验收跑 python checks/check_t05.py",
+ "timeout_s": 1800,
+ "accept": [
+  "python checks/check_t05.py"
+ ],
+ "source_commit": "67fcf64",
+ "source_subject": "fix: honour a falsey validator in bucket (#1308)",
+ "upstream": "C:\\probe-repos\\more-itertools"
+}

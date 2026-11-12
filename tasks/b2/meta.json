@@ -1,0 +1,22 @@
+{
+  "id": "b2",
+  "tier": "B",
+  "goal": "把 scripts 下 12 个脚本（job_01.py … job_12.py）里的 print 统一换成 logging：用 logging.getLogger(__name__) 取模块级 logger，以 INFO 级别输出原来那句话，文本内容与返回值都必须保持不变，且源码里不能再出现 print。每个脚本一个文件，互不依赖，可以并行改。验收：依次跑 python checks/unit_01.py … unit_12.py，全部退出码 0。",
+  "timeout_s": 2400,
+  "accept": [
+    "python checks/unit_01.py",
+    "python checks/unit_02.py",
+    "python checks/unit_03.py",
+    "python checks/unit_04.py",
+    "python checks/unit_05.py",
+    "python checks/unit_06.py",
+    "python checks/unit_07.py",
+    "python checks/unit_08.py",
+    "python checks/unit_09.py",
+    "python checks/unit_10.py",
+    "python checks/unit_11.py",
+    "python checks/unit_12.py"
+  ],
+  "batch_size": 12,
+  "kind": "日志统一（同构）"
+}

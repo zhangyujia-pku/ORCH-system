@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务关键词搜索",
+      "deps": [],
+      "reads": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "app.py",
+        "cli.py",
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 和 tests/test_cli.py 均含名为 test_search_preserves_storage 的测试；每个测试使用临时存储路径，读取搜索前后的文件字节，通过 assert before_bytes == after_bytes 判定搜索未修改持久化数据。",
+        "文件断言：storage.py 含函数 search_tasks；app.py 和 cli.py 均含对 search_tasks 的调用，均含字符串“未找到匹配的任务”。",
+        "命令 `git diff --name-only -- tasks.json requirements.txt .gitignore` 退出码等于 0，标准输出等于空字符串。"
+      ],
+      "forbidden": [
+        "tasks.json",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "沿用现有技术栈，不引入依赖。",
+        "共享搜索逻辑放在 storage.py，app.py 与 cli.py 调用该逻辑。",
+        "按任务标题进行忽略大小写的关键词匹配，去除关键词首尾空白。",
+        "空关键词展示全部任务，无匹配时显示“未找到匹配的任务”。",
+        "测试使用临时存储，搜索不修改持久化数据。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

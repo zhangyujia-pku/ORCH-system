@@ -1,0 +1,17 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现登录接口",
+      "writes": [
+        "migrations/001_init.sql"
+      ],
+      "acceptance": [
+        "pytest -q tests/test_auth.py 退出码 0"
+      ],
+      "forbidden": [
+        "migrations/**"
+      ]
+    }
+  ]
+}

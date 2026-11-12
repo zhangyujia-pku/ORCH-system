@@ -1,0 +1,19 @@
+diff --git a/tests/test_app.py b/tests/test_app.py
+index e61f00f..ded557e 100644
+--- a/tests/test_app.py
++++ b/tests/test_app.py
+@@ -27,3 +27,14 @@ def test_create_task(client):
+ 
+ def test_create_requires_title(client):
+     assert client.post("/tasks", json={}).status_code == 400
++
++def test_storage_persists_tasks_after_restart(tmp_path, monkeypatch):
++    monkeypatch.setattr(storage, "DATA_FILE", tmp_path / "tasks.json")
++    storage.reset()
++    saved = storage.create("持久化任务")
++
++    storage.TASKS = {task["id"]: task for task in storage._load()}
++    storage._next_id = max(storage.TASKS, default=0) + 1
++
++    assert storage.list_all() == [saved]
++    assert storage.get(saved["id"]) == saved

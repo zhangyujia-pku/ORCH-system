@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表分页",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "requirements.txt"
+      ],
+      "writes": [
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 的现有任务列表读取入口提供可选关键字参数 offset=0 和 limit=None，保持原有返回类型。",
+        "文件断言：tests/test_app.py 包含直接调用存储层的分页测试，覆盖默认返回完整列表、首段、中间段、末段、越界 offset、limit=0 和空列表。",
+        "文件断言：tests/test_app.py 包含参数校验测试，覆盖负数、浮点数、字符串和布尔值触发 ValueError，以及 limit=None 合法。",
+        "文件断言：tests/test_app.py 的分页测试使用临时存储，断言分页结果保持原有顺序且读取分页不会改变已存储任务；存在筛选功能时断言先筛选再分页。",
+        "python -m pytest -q 退出码为 0。",
+        "git diff --name-only -- app.py cli.py requirements.txt README.md .gitignore tasks.json tests/test_cli.py 输出为空。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        ".gitignore",
+        "tasks.json",
+        "tests/test_cli.py"
+      ],
+      "context_refs": [
+        "仅修改存储层任务列表读取能力，其他接口行为保持原样。",
+        "采用 offset/limit 分页，默认调用仍返回完整列表。",
+        "沿用现有存储格式，不增加依赖。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

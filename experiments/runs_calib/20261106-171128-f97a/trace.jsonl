@@ -1,0 +1,4 @@
+{"event": "run.start", "ts": "2026-11-06T17:11:28+08:00", "data": {"run_id": "20261106-171128-f97a", "created_at": "2026-11-06T17:11:28+08:00", "raw_text": "加个搜索，能用关键词找任务，体验好一点。", "repo": "<HOME>\\WorkBuddy\\agent协同项目\\orchestrator\\demo\\tasks_app", "repo_head": "217ecd8", "max_agents": 3, "budget_usd": 6, "flags": ["I001", "I003"], "flag_notes": ["I001 未声明验收标准", "I003 未指明改动范围"]}}
+{"event": "plan.start", "ts": "2026-11-06T17:11:28+08:00", "session": 1, "data": {"provider": "codex", "max_attempts": 3, "repo": "<HOME>\\WorkBuddy\\agent协同项目\\orchestrator\\demo\\tasks_app", "n_repo_files": 14}}
+{"event": "plan.rejected", "ts": "2026-11-06T17:12:29+08:00", "session": 1, "data": {"attempt": 1, "codes": ["E014", "E014", "E014"], "violations": ["E014", "E014", "E014"]}}
+{"event": "plan.accepted", "ts": "2026-11-06T17:13:12+08:00", "session": 1, "data": {"attempt": 2, "n_tasks": 1, "layers": [["t01"]], "max_width": 1}}

@@ -1,0 +1,24 @@
+{
+  "frozen_at": "2026-11-12T06:41:18",
+  "version": "router-v2",
+  "total_hash": "6d9f2735a403ecc2415655204be0de31bc1c870d058172ba1b2719cfa3043451",
+  "tasks": {
+    "r2short": "26865665a35b7457b9e2ec697727dcabcaaecacce632b6709c7f030cf450b668",
+    "r2shared": "148255b314f281d6fc9cbb6b6a680e1b6432201d3f905c308cab1f20f8414ce6"
+  },
+  "counts": {
+    "r2short": {
+      "files": 18,
+      "accept": 4,
+      "batch_size": 4
+    },
+    "r2shared": {
+      "files": 21,
+      "accept": 5,
+      "batch_size": 4
+    }
+  },
+  "codex": "codex-cli 0.167.0-alpha.4.1",
+  "orch": "v1.9.4-37-ged189c6",
+  "rule": "冻结后任何文件改动都必须升 version，并声明旧数据作废。"
+}

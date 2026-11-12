@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表分页",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 含分页首段、后续段、越界空列表、非法分页参数、未提供分页参数时保持原有行为的测试。",
+        "文件断言：README.md 含“修改文件”“分页参数”“默认行为”“测试命令”“执行结果”五项说明，测试命令含 `python -m pytest -q tests/test_app.py tests/test_cli.py`，执行结果含实际退出码。",
+        "命令 `git diff --name-only -- cli.py requirements.txt .gitignore tests/test_cli.py` 退出码等于 0 且输出为空。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tests/test_cli.py",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "storage.py 与 app.py 的分页改动存在顺序依赖，作为一个任务交付。",
+        "未提供分页参数时保持现有列表行为。",
+        "其它接口行为保持原样。",
+        "沿用已有明确分页约定，不重新选择技术栈。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

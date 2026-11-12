@@ -1,0 +1,15 @@
+{
+  "id": "h1",
+  "tier": "H",
+  "goal": "这个仓库是一个小型领域服务框架，5 个领域（orders、invoices、refunds、shipments、tickets）都只写了一半。请按 docs/CONVENTIONS.md 的分层约定把它们补完整：\n· models 里补 validate()（非法入参抛 ValidationError，消息带字段名）；\n· store 里补软删除与分页（用 app.common.pagination.paginate）；\n· rules 里实现状态机 next_state（非法迁移抛 Conflict）；\n· service 里实现 create / list / update / delete，并按约定写事件。\napp/common/ 下的共享层是稳定的，不要改。每个领域互不依赖，可以并行。验收：依次跑 checks/unit_01.py checks/unit_02.py checks/unit_03.py checks/unit_04.py checks/unit_05.py，全部退出码 0。",
+  "timeout_s": 3600,
+  "accept": [
+    "python checks/unit_01.py",
+    "python checks/unit_02.py",
+    "python checks/unit_03.py",
+    "python checks/unit_04.py",
+    "python checks/unit_05.py"
+  ],
+  "batch_size": 5,
+  "kind": "重单元（跨三层）"
+}

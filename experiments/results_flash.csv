@@ -1,0 +1,7 @@
+﻿plan,rep,arm,status,verify_ok,failures,seconds
+m1-response-id,1,openai,done,ok,,70.3
+m1-response-id,1,codex-ds-flash,done,ok,,53.9
+m2-delete-bool,1,openai,done,ok,,87.7
+m2-delete-bool,1,codex-ds-flash,done,ok,,195.3
+m3-sort-desc,1,openai,done,ok,,63.6
+m3-sort-desc,1,codex-ds-flash,done,ok,,100.6

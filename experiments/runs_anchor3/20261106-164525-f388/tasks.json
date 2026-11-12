@@ -1,0 +1,45 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务软删除",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "app.py",
+        "cli.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q 退出码为 0。",
+        "文件断言：tests/test_app.py 包含软删除回归测试，使用临时存储创建并删除任务后，直接读取持久化数据，断言原记录仍存在、原任务字段保留且具有删除标记。",
+        "文件断言：tests/test_app.py 包含回归测试，断言删除后正常查询不返回该任务，删除响应遵循现有测试中的状态码与响应格式约定。",
+        "文件断言：tests/test_app.py 包含历史数据兼容测试，断言没有删除标记的记录仍能正常查询和操作。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "README.md",
+        "tests/test_cli.py",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "删除只做标记，原始记录保留。",
+        "沿用现有存储方式，缺少删除标记的历史记录视为未删除。",
+        "其它接口行为保持原样，不扩展无关功能。",
+        "完成后报告修改文件与具体改动。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}

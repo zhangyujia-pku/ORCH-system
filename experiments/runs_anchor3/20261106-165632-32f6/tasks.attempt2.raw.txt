@@ -1,0 +1,46 @@
+```json
+{
+  "spec_md": "# 任务列表分页\n## 要实现\n为任务列表增加分页能力，修改范围限于数据读取、列表接口、相关测试和改动说明。\n未提供分页参数时保持现有列表行为，其它接口行为保持原样。\n## 不能改\n不修改 cli.py、requirements.txt、.gitignore、tests/test_cli.py，不写入运行期数据或缓存。\n不进行无关重构，不改变其它接口的响应结构。\n## 已定的技术决策\n沿用 storage.py 与 app.py 的现有职责划分和技术栈。\n分页参数、默认值和返回结构沿用已有明确约定；当前输入未包含这些约定的具体值，不自行声称已有约定。\n在 README.md 中说明修改文件、实际采用的分页参数及默认行为、测试命令和执行结果。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务列表分页",
+      "reads": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "tests/test_cli.py",
+        "README.md"
+      ],
+      "writes": [
+        "storage.py",
+        "app.py",
+        "tests/test_app.py",
+        "README.md"
+      ],
+      "acceptance": [
+        "命令 `python -m pytest -q tests/test_app.py tests/test_cli.py` 退出码等于 0。",
+        "文件断言：tests/test_app.py 含分页首段、后续段、越界空列表、非法分页参数、未提供分页参数时保持原有行为的测试。",
+        "文件断言：README.md 含“修改文件”“分页参数”“默认行为”“测试命令”“执行结果”五项说明，测试命令含 `python -m pytest -q tests/test_app.py tests/test_cli.py`，执行结果含实际退出码。",
+        "命令 `git diff --name-only -- cli.py requirements.txt .gitignore tests/test_cli.py` 退出码等于 0 且输出为空。"
+      ],
+      "forbidden": [
+        "cli.py",
+        "requirements.txt",
+        ".gitignore",
+        "tests/test_cli.py",
+        "tasks.json",
+        "__pycache__/**",
+        "tests/__pycache__/**"
+      ],
+      "context_refs": [
+        "storage.py 与 app.py 的分页改动存在顺序依赖，作为一个任务交付。",
+        "未提供分页参数时保持现有列表行为。",
+        "其它接口行为保持原样。",
+        "沿用已有明确分页约定，不重新选择技术栈。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

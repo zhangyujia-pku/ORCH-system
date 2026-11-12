@@ -1,0 +1,42 @@
+{
+  "frozen_at": "2026-11-11T08:56:10",
+  "version": "taskset-ladder-v1",
+  "total_hash": "8a3982af4e631d179ec3897fa046eb6b195034a09f6176cc88fb4e5dc82efa23",
+  "tasks": {
+    "sc01": "960c360f16bfae8effcfef85c9daa0c8350ccc66f657e173235cbc2d3d8ce4b2",
+    "sc02": "6719276ed8dc81513c6cc4d6ab7b9c73e9f2f4725eb84801e54316d1b3dc227f",
+    "sc04": "4fb2cb3a7711966117a9e7bcccd971cf37c006b0233e4b12a44ac56cbe29f872",
+    "sc08": "ea632e2e4e4dc9078bb6991678a091df49dba0f4671ed7a725e661fe38e724fc",
+    "sc16": "c15a21dd7258ead29cb29ed597cbe5ed5b61d97977d40ebcc6f8741e75e9cd9d"
+  },
+  "counts": {
+    "sc01": {
+      "files": 6,
+      "accept": 1,
+      "batch_size": 1
+    },
+    "sc02": {
+      "files": 10,
+      "accept": 2,
+      "batch_size": 2
+    },
+    "sc04": {
+      "files": 18,
+      "accept": 4,
+      "batch_size": 4
+    },
+    "sc08": {
+      "files": 34,
+      "accept": 8,
+      "batch_size": 8
+    },
+    "sc16": {
+      "files": 66,
+      "accept": 16,
+      "batch_size": 16
+    }
+  },
+  "codex": "codex-cli 0.167.0-alpha.3.2",
+  "orch": "v1.9.4-29-ga152b9d",
+  "rule": "冻结后任何文件改动都必须升 version，并声明旧数据作废。"
+}

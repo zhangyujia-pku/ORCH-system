@@ -1,0 +1,42 @@
+```json
+{
+  "spec_md": "# 导出任务 CSV\n## 要做\n在 app.py 增加 GET /tasks/export，通过 storage.py 的现有读取接口获取任务列表，输出任务 ID、标题、完成状态三列 CSV。\n包含表头，数据行保留存储接口返回的任务顺序；空列表仅输出表头。\n正确处理标题中的中文、逗号、双引号和换行。\n## 不能改\n不修改 storage.py、cli.py、requirements.txt、README.md 或现有路由行为。\n不直接读取或写入 tasks.json。\n## 已定\nHTTP 路由与响应组装保留在 app.py。\n使用 Python 标准库 csv 生成 CSV，响应使用 UTF-8 编码和 text/csv 类型。\n沿用现有任务结构中的 ID、标题、完成状态字段名作为表头。\n该改动属于单一路由功能，不拆分任务。",
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务 CSV 导出路由",
+      "reads": [
+        "app.py",
+        "storage.py",
+        "tests/test_app.py"
+      ],
+      "writes": [
+        "app.py",
+        "tests/test_app.py"
+      ],
+      "acceptance": [
+        "python -m pytest -q tests/test_app.py::test_export_tasks_csv 退出码 0；该测试断言 GET /tasks/export 返回 200、Content-Type 含 text/csv，并使用 csv.reader 断言两条任务的解析结果等于预先构造的三列表头及两行期望值。",
+        "python -m pytest -q tests/test_app.py::test_export_tasks_csv_special_characters 退出码 0；该测试使用标题字符串 '中文,逗号\"双引号\\n换行'，断言 csv.reader 解析出的标题等于该字符串。",
+        "python -m pytest -q tests/test_app.py::test_export_tasks_csv_empty 退出码 0；该测试将存储读取接口替换为返回空列表，断言 csv.reader 解析结果等于仅包含三列表头的列表。",
+        "python -m pytest -q tests/test_app.py::test_export_tasks_uses_storage 退出码 0；该测试替换 storage.py 的现有读取接口，断言 GET /tasks/export 调用该接口 1 次，并在直接访问 tasks.json 时令测试失败。",
+        "python -m pytest -q tests/test_app.py tests/test_cli.py 退出码 0"
+      ],
+      "forbidden": [
+        "storage.py",
+        "cli.py",
+        "requirements.txt",
+        "README.md",
+        "tasks.json"
+      ],
+      "context_refs": [
+        "路由及响应组装位于 app.py。",
+        "通过 storage.py 现有读取接口获取任务列表。",
+        "使用 Python 标准库 csv，输出 UTF-8 编码的 text/csv 响应。",
+        "三列依次为任务 ID、标题、完成状态，表头沿用现有字段名。",
+        "保留存储返回顺序，空列表仅输出表头。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
+```

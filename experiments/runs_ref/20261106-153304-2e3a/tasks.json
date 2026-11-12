@@ -1,0 +1,38 @@
+{
+  "tasks": [
+    {
+      "id": "t01",
+      "goal": "实现任务存储的自动持久化",
+      "deps": [],
+      "reads": [
+        "storage.py",
+        "tests/test_app.py",
+        "tests/test_cli.py"
+      ],
+      "writes": [
+        "storage.py"
+      ],
+      "acceptance": [
+        "文件断言：storage.py 含模块级函数 _save()，其函数体含标准库 json.dump 或 json.dumps 调用，序列化参数等于当前完整任务集合。",
+        "文件断言：_save() 使用的输出路径等于 storage.py 的 __file__ 所在目录拼接 tasks.json。",
+        "文件断言：storage.py 每个成功执行增、删、改的分支均含 _save() 调用，调用位置位于内存状态更新之后。",
+        "文件断言：_save() 打开目标文件的模式等于 w 或 wt，不含追加模式 a 或 at。"
+      ],
+      "forbidden": [
+        "app.py",
+        "cli.py",
+        "tests/**",
+        "README.md",
+        "requirements.txt",
+        ".gitignore"
+      ],
+      "context_refs": [
+        "使用标准库 json 保存全部任务。",
+        "保存路径基于 storage.py 的 __file__ 定位。",
+        "每次成功写操作更新内存后调用 _save()。",
+        "覆盖写入 tasks.json，不添加启动加载功能，不改变公开接口。"
+      ],
+      "budget": 1.0
+    }
+  ]
+}
