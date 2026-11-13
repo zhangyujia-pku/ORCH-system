@@ -53,8 +53,8 @@
 ### 安装（一次性，需要终端）
 
 ```bash
-git clone https://github.com/zhangyujia-pku/ORCH-system.git
-cd ORCH-system
+git clone https://github.com/zhangyujia-pku/orch-codex-orchestrator.git
+cd orch-codex-orchestrator
 python scripts/install_cli.py
 ```
 
