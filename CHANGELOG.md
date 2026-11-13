@@ -1,5 +1,22 @@
 # 变更记录
 
+## v1.9.7 · 2026-11-13（preflight 的沙箱探针不再误报）
+
+**症状**：`preflight` 第 6 项报红，`✗ 沙箱起进程 无输出`，而同一台机器上
+`codex exec --sandbox workspace-write` 跑得好好的，输出里还明确写着
+`sandbox: workspace-write ... (network access enabled)`。
+
+**原因**：探针调的是 `codex sandbox` 子命令。这个版本里它返回 1、stdout 全空，
+只在 stderr 留一句无关的 `failed to clean up stale arg0 temp dirs`。
+拿它当判据，等于用一个失效的仪器判死刑。
+
+**改了什么**：探针失败时，Windows 上退一步读注册表看沙箱服务是否已注册
+（`HKLM\SYSTEM\CurrentControlSet\Services\CodexSandboxService.OpenAI.Codex`），
+注册了就降级成 `!`（提醒），并说明是探针失效而不是环境坏了。
+
+**顺带**：这条退路不用 `sc` / `net`——实测这两者在部分机器的命令安全策略里被拉黑，
+一调就报 `PROGRAM BLOCKED` 且不允许绕过，整段检查直接作废。读注册表没有这个风险。
+
 ## v1.9.6 · 2026-11-13（目标文件夹先校验；验收判据不向用户要）
 
 **症状**：路径写错时（少一层目录、拼错名字），报错长这样——

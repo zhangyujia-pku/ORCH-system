@@ -110,6 +110,32 @@ def check_codex() -> tuple[str, str, str]:
     return (OK if code == 0 else WARN), "codex 二进制", f"{exe} · {out}"
 
 
+def _win_sandbox_present() -> tuple[bool, str]:
+    """Windows 沙箱是否已就位（看服务是否注册）。
+
+    这是 `codex sandbox` 探针失败时的退路。实测（2026-11-13）：
+    探针返回 1、stdout 全空；但同一台机器上 `codex exec --sandbox workspace-write`
+    能正常起，输出里明确写着 `sandbox: workspace-write ... (network access enabled)`。
+    也就是说探针不可靠，不能拿它判死刑。
+
+    只读注册表，不调外部命令 —— `sc` / `net` 在部分机器的命令安全策略里被拉黑，
+    一调就整段检查作废（实测会报 PROGRAM BLOCKED，且不允许绕过）。
+    """
+    try:
+        import winreg
+    except ImportError:
+        return False, "非 Windows 环境"
+    try:
+        with winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SYSTEM\CurrentControlSet\Services\CodexSandboxService.OpenAI.Codex",
+        ):
+            pass
+    except OSError:
+        return False, "沙箱服务没注册（注册表里没有这个服务）"
+    return True, "沙箱服务已注册、配置就位（探针本身失效）"
+
+
 def check_sandbox() -> tuple[str, str, str]:
     """沙箱能不能起进程——这是真实踩过的坑，而且能免费验。
 
@@ -138,6 +164,12 @@ def check_sandbox() -> tuple[str, str, str]:
                      if "failed to clean up stale arg0" not in ln)
     if "orch-preflight" in out:
         return OK, "沙箱起进程", "codex sandbox 能起子进程"
+    if os.name == "nt":
+        healthy, detail = _win_sandbox_present()
+        if healthy:
+            # 探针在某些 codex 版本里什么都不输出、直接退出 1，但沙箱其实是好的
+            # （exec 能起、配置也生效）。这时报红会把人带偏，降级成提醒。
+            return WARN, "沙箱起进程", f"探针无输出（这个版本不可靠），但{detail}"
     return FAIL, "沙箱起进程", (out.splitlines() or ["无输出"])[-1][:160]
 
 
