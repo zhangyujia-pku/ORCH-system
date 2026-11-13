@@ -43,7 +43,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import thread as thread_mod
-from .intake import intake
+from .intake import intake, require_repo
 
 # Windows：脱离控制台 + 独立进程组。两个都要，缺一个都可能被父进程组带走。
 _DETACHED_PROCESS = 0x00000008
@@ -657,6 +657,15 @@ def _run_job(
     intent = _read_intent(run_dir)
     text = intent.get("raw_text", "")
     repo_path = repo or intent.get("repo") or "."
+    # 恢复一条旧 run 时目标可能已经被删/被改名。这里同样先确认，
+    # 否则会拖到 worktree 那一步才炸，报出来的话看不出是路径问题。
+    try:
+        repo_path = str(require_repo(repo_path))
+    except ValueError as e:
+        log(f"repo 不可用：{e}")
+        return _finish(run_dir, None, notify, log,
+                       _render_error("目标仓库不可用", run_id, text, str(e)), 2,
+                       state="failed", stage="preflight", reason=str(e))
 
     # 1) 先定位窗口。趁早做：CommandExecution 记录要等命令结束才落盘，
     #    所以这里允许等（默认 45 秒），不占后续 plan/run 的时间。
@@ -1241,7 +1250,14 @@ def main(argv: list[str] | None = None) -> int:
         ap.error("恢复已有运行请使用 --job <run_id> --resume 或 orch run <run_id> --resume")
 
     mode = "foreground" if args.foreground else args.mode
-    runs_dir = args.runs_dir or str(Path(args.repo).resolve() / ".orch-runs")
+    # 先确认目标文件夹存在，再算 runs_dir：路径写错时要立刻说清是哪个路径，
+    # 而不是先建一堆目录、再在 git 那一步报一句看不出原因的话。
+    try:
+        repo_path = require_repo(args.repo)
+    except ValueError as e:
+        print(f"错误：{e}", file=sys.stderr)
+        return 2
+    runs_dir = args.runs_dir or str(repo_path / ".orch-runs")
     notify = not args.no_notify
     d, code = dispatch(
         args.text, repo=args.repo, runs_dir=runs_dir,

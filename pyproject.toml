@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orch-agents"
-version = "1.9.5"
+version = "1.9.6"
 description = "多 Agent 编排引擎：任务契约、静态校验、隔离执行、确定性验收"
 requires-python = ">=3.10"
 dependencies = []

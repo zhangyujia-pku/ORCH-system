@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 from .contract import Report, repo_snapshot, validate_file
-from .intake import FLAGS, find_latest_run, intake
+from .intake import FLAGS, find_latest_run, intake, require_repo
 from .planner import CLIProvider, PlanResult, Provider, StubProvider, plan_run
 from .trace import Tracer
 from .workers import (
@@ -56,6 +56,11 @@ def format_report(rep: Report, title: str = "") -> str:
 
 
 def cmd_intake(args) -> int:
+    try:
+        require_repo(args.repo)
+    except ValueError as e:
+        print(f"错误：{e}", file=sys.stderr)
+        return 2
     it = intake(
         args.text,
         repo=args.repo,

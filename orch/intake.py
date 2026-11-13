@@ -109,6 +109,22 @@ def make_run_id(text: str) -> str:
     return f"{stamp}-{salt}"
 
 
+def require_repo(repo: str | Path) -> Path:
+    """目标文件夹必须真实存在。
+
+    路径写错是首次使用最常见的失败，而且报错很难看：老流程会把路径原样
+    交给 git，于是 `git rev-parse` 抛一句 `cannot change to '<路径>'`，
+    和"仓库没初始化""权限不够"混在一起，用户分不清是哪种。
+    在这里挡掉，报错就能直接说清楚是哪个路径、不存在。
+    """
+    p = Path(repo).expanduser().resolve()
+    if not p.exists():
+        raise ValueError(f"目标文件夹不存在：{p}")
+    if not p.is_dir():
+        raise ValueError(f"目标不是文件夹：{p}")
+    return p
+
+
 def intake(
     text: str,
     repo: str | Path = ".",
@@ -116,7 +132,7 @@ def intake(
     max_agents: int = 4,
     budget_usd: float = 6.0,
 ) -> Intent:
-    repo_path = Path(repo).resolve()
+    repo_path = require_repo(repo)
     head, head_error = git_baseline(repo_path)
     it = Intent(
         run_id=make_run_id(text),
