@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1310" viewBox="0 0 2000 1310" role="img" aria-labelledby="title desc">
+<title id="title">orch：从需求投递到产物交付</title>
+<desc id="desc">三行蛇形流程。第一行从左向右，第二行从右向左，第三行从左向右。需求接入、模式选择、计划准备、静态校验、执行前检查、隔离并行执行、任务验收、独立整合、整体验收、自动合并、报告回传、产物交付。</desc>
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+<text x="60" y="40" dominant-baseline="text-before-edge" text-anchor="start" fill="#2564B5" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="600">01  接入与规划</text>
+<rect x="60" y="90" width="230" height="220" rx="18" fill="#192C44" stroke="none" stroke-width="1.5"/>
+<text x="175" y="134" dominant-baseline="text-before-edge" text-anchor="middle" fill="#FFFFFF" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="33" font-weight="600">需求投递</text>
+<text x="175" y="197" dominant-baseline="text-before-edge" text-anchor="middle" fill="#FFFFFF" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">用户提出需求</text>
+<rect x="330" y="90" width="300" height="220" rx="18" fill="#EDF4FD" stroke="none" stroke-width="1.5"/>
+<text x="480" y="115" dominant-baseline="text-before-edge" text-anchor="middle" fill="#2564B5" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">接收与存档</text>
+<text x="480" y="172" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">dispatch / intake</text>
+<text x="480" y="208" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">原话 → intent.md</text>
+<text x="480" y="244" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">记录 run_id 与基线</text>
+<polyline points="290,200 330,200" fill="none" stroke="#94A2B2" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="320.00,195.00 330.00,200.00 320.00,205.00" fill="none" stroke="#94A2B2" stroke-width="2"/>
+<rect x="670" y="90" width="460" height="106" rx="18" fill="#EDF4FD" stroke="none" stroke-width="1.5"/>
+<text x="900" y="105" dominant-baseline="text-before-edge" text-anchor="middle" fill="#2564B5" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="600">前台同步 · 短对话</text>
+<text x="900" y="149" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">≤ 8 分钟 · 同轮等待 · 无需宿主</text>
+<rect x="670" y="206" width="460" height="104" rx="18" fill="#EDF4FD" stroke="none" stroke-width="1.5"/>
+<text x="900" y="220" dominant-baseline="text-before-edge" text-anchor="middle" fill="#2564B5" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="600">后台宿主 · 长对话</text>
+<text x="900" y="261" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">&gt; 8 分钟或稍后通知；宿主须运行</text>
+<polyline points="630,200 650,200 650,143 670,143" fill="none" stroke="#94A2B2" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="660.00,138.00 670.00,143.00 660.00,148.00" fill="none" stroke="#94A2B2" stroke-width="2"/>
+<polyline points="650,200 650,258 670,258" fill="none" stroke="#94A2B2" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="660.00,253.00 670.00,258.00 660.00,263.00" fill="none" stroke="#94A2B2" stroke-width="2"/>
+<polyline points="1130,143 1150,143 1150,200 1170,200" fill="none" stroke="#94A2B2" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1160.00,195.00 1170.00,200.00 1160.00,205.00" fill="none" stroke="#94A2B2" stroke-width="2"/>
+<polyline points="1130,258 1150,258 1150,200" fill="none" stroke="#94A2B2" stroke-width="2" stroke-linejoin="round"/>
+<rect x="1170" y="90" width="340" height="220" rx="18" fill="#EDF4FD" stroke="none" stroke-width="1.5"/>
+<text x="1340" y="115" dominant-baseline="text-before-edge" text-anchor="middle" fill="#2564B5" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">计划准备</text>
+<text x="1340" y="172" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">载入已有 --plan</text>
+<text x="1340" y="208" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">或调用 Planner</text>
+<text x="1340" y="244" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">目标、读写范围、依赖</text>
+<rect x="1550" y="90" width="360" height="220" rx="18" fill="#EDF4FD" stroke="none" stroke-width="1.5"/>
+<text x="1730" y="115" dominant-baseline="text-before-edge" text-anchor="middle" fill="#2564B5" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">静态校验</text>
+<text x="1730" y="172" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">结构与写集合法</text>
+<text x="1730" y="208" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">依赖完整、判据可判定</text>
+<text x="1730" y="244" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">通过后才进入执行</text>
+<polyline points="1510,200 1550,200" fill="none" stroke="#94A2B2" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1540.00,195.00 1550.00,200.00 1540.00,205.00" fill="none" stroke="#94A2B2" stroke-width="2"/>
+<polyline points="1730,310 1730,347 1340,347 1340,310" fill="none" stroke="#B24B42" stroke-width="2" stroke-linejoin="round" stroke-dasharray="7 7"/>
+<polyline points="1335.00,320.00 1340.00,310.00 1345.00,320.00" fill="none" stroke="#B24B42" stroke-width="2"/>
+<text x="1535" y="358" dominant-baseline="text-before-edge" text-anchor="middle" fill="#B24B42" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">未通过 → 反馈错误、修订计划</text>
+<polyline points="1910,200 1950,200 1950,435 1750,435 1750,485" fill="none" stroke="#2564B5" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1755.00,475.00 1750.00,485.00 1745.00,475.00" fill="none" stroke="#2564B5" stroke-width="2"/>
+<text x="60" y="435" dominant-baseline="text-before-edge" text-anchor="start" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="600">02  按依赖分层执行与逐层整合</text>
+<rect x="1590" y="485" width="320" height="220" rx="18" fill="#FFF7EB" stroke="none" stroke-width="1.5"/>
+<text x="1750" y="510" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">执行前检查</text>
+<text x="1750" y="567" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">基线、后端与分派</text>
+<text x="1750" y="603" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">检查配置、保护范围</text>
+<text x="1750" y="639" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">不满足 → blocked</text>
+<polyline points="1590,595 1568,595 1568,575 1235,575" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<rect x="925" y="485" width="620" height="400" rx="18" fill="#FFF7EB" stroke="none" stroke-width="1.5"/>
+<text x="1235" y="506" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">第 0 层：A、B 可并行</text>
+<text x="1235" y="548" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">共同起点：需求存档时的基线 commit</text>
+<rect x="960" y="600" width="260" height="90" rx="13" fill="#FFFFFF" stroke="#E5CCAB" stroke-width="1.5"/>
+<text x="1090" y="613" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">任务 A</text>
+<text x="1090" y="656" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">无前置依赖</text>
+<polyline points="1235,575 1090,575 1090,600" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1095.00,590.00 1090.00,600.00 1085.00,590.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<polyline points="1090,690 1090,715 1235,715" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<rect x="1250" y="600" width="260" height="90" rx="13" fill="#FFFFFF" stroke="#E5CCAB" stroke-width="1.5"/>
+<text x="1380" y="613" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">任务 B</text>
+<text x="1380" y="656" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">无前置依赖</text>
+<polyline points="1235,575 1380,575 1380,600" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1385.00,590.00 1380.00,600.00 1375.00,590.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<polyline points="1380,690 1380,715 1235,715" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1235,715 1235,740" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1240.00,730.00 1235.00,740.00 1230.00,730.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<rect x="960" y="740" width="550" height="95" rx="13" fill="#FFFFFF" stroke="#E5CCAB" stroke-width="1.5"/>
+<text x="1235" y="754" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="600">各任务验收 → 独立整合本层成果</text>
+<text x="1235" y="798" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">范围检查 · 合格提交 · 恢复点 · 下一层基线</text>
+<rect x="150" y="485" width="620" height="400" rx="18" fill="#FFF7EB" stroke="none" stroke-width="1.5"/>
+<text x="460" y="506" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">第 1 层：C、D 可并行</text>
+<text x="460" y="548" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">共同起点：第 0 层已整合版本</text>
+<rect x="185" y="600" width="260" height="90" rx="13" fill="#FFFFFF" stroke="#E5CCAB" stroke-width="1.5"/>
+<text x="315" y="613" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">任务 C</text>
+<text x="315" y="656" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">依赖 A + B</text>
+<polyline points="460,575 315,575 315,600" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="320.00,590.00 315.00,600.00 310.00,590.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<polyline points="315,690 315,715 460,715" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<rect x="475" y="600" width="260" height="90" rx="13" fill="#FFFFFF" stroke="#E5CCAB" stroke-width="1.5"/>
+<text x="605" y="613" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="600">任务 D</text>
+<text x="605" y="656" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">依赖 B</text>
+<polyline points="460,575 605,575 605,600" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="610.00,590.00 605.00,600.00 600.00,590.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<polyline points="605,690 605,715 460,715" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="460,715 460,740" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="465.00,730.00 460.00,740.00 455.00,730.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<rect x="185" y="740" width="550" height="95" rx="13" fill="#FFFFFF" stroke="#E5CCAB" stroke-width="1.5"/>
+<text x="460" y="754" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="600">各任务验收 → 独立整合本层成果</text>
+<text x="460" y="798" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">范围检查 · 合格提交 · 恢复点 · 下一层基线</text>
+<polyline points="960,790 850,790 850,575 460,575" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<rect x="783" y="650" width="134" height="74" rx="5" fill="#FFFFFF" stroke="none" stroke-width="1.5"/>
+<text x="850" y="658" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="600">deps 满足</text>
+<text x="850" y="694" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">成果传递</text>
+<polyline points="1510,788 1530,788 1530,645 1510,645" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round" stroke-dasharray="7 7"/>
+<polyline points="1520.00,650.00 1510.00,645.00 1520.00,640.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<text x="1235" y="854" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">普通失败 → 有限返工 / 合格后端接替</text>
+<text x="460" y="854" dominant-baseline="text-before-edge" text-anchor="middle" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">第 2 层及后续层：同样按依赖推进</text>
+<text x="1750" y="731" dominant-baseline="text-before-edge" text-anchor="middle" fill="#B24B42" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">条件不满足：尚未开工</text>
+<text x="1750" y="786" dominant-baseline="text-before-edge" text-anchor="middle" fill="#B24B42" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">越界 / 篡改 → 直接失败</text>
+<text x="1750" y="827" dominant-baseline="text-before-edge" text-anchor="middle" fill="#B24B42" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">整合冲突 → 停止后续层</text>
+<text x="1750" y="880" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">每任务独立 worktree</text>
+<text x="1750" y="917" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400">信息不足 → 回答后恢复</text>
+<polyline points="185,790 30,790 30,1160 60,1160" fill="none" stroke="#A56722" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="50.00,1155.00 60.00,1160.00 50.00,1165.00" fill="none" stroke="#A56722" stroke-width="2"/>
+<text x="70" y="970" dominant-baseline="text-before-edge" text-anchor="start" fill="#A56722" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400">全部依赖层的任务及整合通过</text>
+<text x="60" y="1015" dominant-baseline="text-before-edge" text-anchor="start" fill="#26745C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="600">03  核验、落地与交付</text>
+<rect x="60" y="1065" width="500" height="205" rx="18" fill="#EDF7F2" stroke="none" stroke-width="1.5"/>
+<text x="310" y="1090" dominant-baseline="text-before-edge" text-anchor="middle" fill="#26745C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">整体验收（配置后执行）</text>
+<text x="310" y="1147" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">整合目录运行固定检查</text>
+<text x="310" y="1183" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">确认验收过程未改动产物</text>
+<text x="310" y="1219" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">未配置则跳过，报告验证范围</text>
+<text x="310" y="1245" dominant-baseline="text-before-edge" text-anchor="middle" fill="#B24B42" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="20" font-weight="400">检查失败 → 停止交付</text>
+<polyline points="560,1160 600,1160" fill="none" stroke="#26745C" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="590.00,1155.00 600.00,1160.00 590.00,1165.00" fill="none" stroke="#26745C" stroke-width="2"/>
+<rect x="600" y="1065" width="500" height="205" rx="18" fill="#EDF7F2" stroke="none" stroke-width="1.5"/>
+<text x="850" y="1090" dominant-baseline="text-before-edge" text-anchor="middle" fill="#26745C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">apply：自动合并当前分支</text>
+<text x="850" y="1147" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">工作区干净且无冲突时落地</text>
+<text x="850" y="1183" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">未能自动合并：保留整合产物</text>
+<text x="850" y="1219" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">报告实际落地状态与产物位置</text>
+<polyline points="1100,1160 1140,1160" fill="none" stroke="#26745C" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1130.00,1155.00 1140.00,1160.00 1130.00,1165.00" fill="none" stroke="#26745C" stroke-width="2"/>
+<rect x="1140" y="1065" width="350" height="205" rx="18" fill="#EDF7F2" stroke="none" stroke-width="1.5"/>
+<text x="1315" y="1090" dominant-baseline="text-before-edge" text-anchor="middle" fill="#26745C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="600">报告回传</text>
+<text x="1315" y="1147" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">前台：同轮直接返回</text>
+<text x="1315" y="1183" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">后台：投回原会话</text>
+<text x="1315" y="1219" dominant-baseline="text-before-edge" text-anchor="middle" fill="#617287" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">执行者、验收与成本</text>
+<polyline points="1490,1160 1530,1160" fill="none" stroke="#26745C" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1520.00,1155.00 1530.00,1160.00 1520.00,1165.00" fill="none" stroke="#26745C" stroke-width="2"/>
+<rect x="1530" y="1065" width="380" height="205" rx="18" fill="#26745C" stroke="none" stroke-width="1.5"/>
+<text x="1720" y="1091" dominant-baseline="text-before-edge" text-anchor="middle" fill="#FFFFFF" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="34" font-weight="600">产物交付</text>
+<text x="1720" y="1147" dominant-baseline="text-before-edge" text-anchor="middle" fill="#FFFFFF" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">产物文件 / 整合分支</text>
+<text x="1720" y="1183" dominant-baseline="text-before-edge" text-anchor="middle" fill="#FFFFFF" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">验收证据 + 执行与成本报告</text>
+<text x="1720" y="1219" dominant-baseline="text-before-edge" text-anchor="middle" fill="#FFFFFF" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400">明确已验证范围及合并状态</text>
+</svg>
