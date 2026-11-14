@@ -7,6 +7,8 @@ worktree 管理：一个任务 = 一个分支 = 一个目录。
 
 from __future__ import annotations
 
+import hashlib
+import os
 import re
 import subprocess
 from dataclasses import dataclass
@@ -39,6 +41,40 @@ class MergeResult:
 class CommitResult:
     sha: str
     created: bool
+
+
+@dataclass(frozen=True)
+class TreeState:
+    """工作区快照：HEAD、暂存区、全部已跟踪与非忽略未跟踪文件的内容指纹。"""
+
+    head: str
+    index: str
+    files: dict[str, str]
+
+    def changes_since(self, before: "TreeState") -> list[str]:
+        changed: set[str] = set()
+        if self.head != before.head:
+            changed.add("<HEAD>")
+        if self.index != before.index:
+            changed.add("<index>")
+        for path in set(before.files) | set(self.files):
+            if before.files.get(path) != self.files.get(path):
+                changed.add(path)
+        return sorted(changed)
+
+
+# 与 apply 的判定一致：纯缓存删了能重生成，不参与验收期改动审计。
+# gitignore 已经覆盖的情况不会再出现在 --others 里，这里兜住没写 .gitignore 的仓库。
+_CACHE_DIRS = ("__pycache__/", ".pytest_cache/", ".mypy_cache/", ".ruff_cache/", ".tox/")
+_CACHE_SUFFIX = (".pyc", ".pyo")
+
+
+def _is_cache_path(path: str) -> bool:
+    p = path.replace("\\", "/")
+    return p.endswith(_CACHE_SUFFIX) or any(
+        f"/{d}" in f"/{p}" or p.startswith(d) or p.endswith(d.rstrip("/"))
+        for d in _CACHE_DIRS
+    )
 
 
 def _run(args: list[str], cwd: Path, check: bool = True, strip: bool = True) -> str:
@@ -137,6 +173,36 @@ class WorktreeManager:
                  "--name-only", "--no-renames", "-z", sha, "--"])
         return sorted(files)
 
+    def snapshot_path(self, path: Path) -> TreeState:
+        """完整状态审计：以后不能用“只查产物文件”漏掉验收命令改别的文件。"""
+        path = Path(path)
+        head = _run(["git", "rev-parse", "HEAD"], path)
+        index_raw = _run(["git", "ls-files", "-s", "-z"], path, strip=False)
+        index = hashlib.sha256(index_raw.encode("utf-8", "surrogatepass")).hexdigest()
+        tracked = [p for p in _run(["git", "ls-files", "-z"], path, strip=False).split("\0") if p]
+        untracked = [
+            p for p in _run(
+                ["git", "ls-files", "--others", "--exclude-standard", "-z"], path, strip=False
+            ).split("\0") if p and not _is_cache_path(p)
+        ]
+        files: dict[str, str] = {}
+        for rel in sorted(set(tracked) | set(untracked)):
+            p = path / rel
+            try:
+                if p.is_symlink():
+                    files[rel] = "link:" + os.readlink(p)
+                elif p.is_file():
+                    files[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
+                else:
+                    files[rel] = "<absent>"
+            except OSError:
+                files[rel] = "<unreadable>"
+        return TreeState(head=head, index=index, files=files)
+
+    def snapshot(self, wt: Worktree) -> TreeState:
+        self.check_lineage(wt)
+        return self.snapshot_path(wt.path)
+
     def check_lineage(self, wt: Worktree) -> None:
         """HEAD 必须继承真实任务起点，不能 reset 掉前置成果后声称完成。"""
         try:
@@ -162,12 +228,33 @@ class WorktreeManager:
         self.check_lineage(wt)
         # 验收通过后才提交，而验收本身会跑命令（pytest 之类）留下缓存。
         # 所以有明确的文件清单时只 add 这些，不用 -A 把验收垃圾一并带上。
-        if files:
-            _run(["git", "add", "--"] + [str(f) for f in files], wt.path)
-            _run(["git", "add", "-u"], wt.path)          # 已跟踪文件的删除也要算进去
+        # files=[] 也必须是“什么都不提交”，不能退化成 -A。
+        before = _run(["git", "rev-parse", "HEAD"], wt.path)
+        if files is not None:
+            allowed = [str(f) for f in files]
+            if allowed:
+                _run(["git", "add", "--"] + allowed, wt.path)
+                # 删除只限清单内的已跟踪文件：git add -u 不带 pathspec 会把
+                # 验收期间删掉的任意跟踪文件一起提交。
+                tracked = [
+                    p for p in _run(
+                        ["git", "ls-files", "-z", "--"] + allowed, wt.path, strip=False
+                    ).split("\0") if p
+                ]
+                if tracked:
+                    _run(["git", "add", "-u", "--"] + tracked, wt.path)
+                staged = [
+                    p for p in _run(
+                        ["git", "diff", "--cached", "--name-only", "--no-renames", "-z",
+                         "HEAD", "--"], wt.path, strip=False
+                    ).split("\0") if p
+                ]
+                extra = sorted(set(staged) - set(allowed))
+                if extra:
+                    _run(["git", "reset", "-q", "HEAD", "--"] + extra, wt.path, check=False)
+                    raise GitError(f"提交范围外文件：{', '.join(extra)}")
         else:
             _run(["git", "add", "-A"], wt.path)
-        before = _run(["git", "rev-parse", "HEAD"], wt.path)
         if not _run(["git", "diff", "--no-textconv", "--cached", "--name-only"], wt.path):
             return CommitResult(before, created=False)
         _run(["git", "commit", "-m", message, "--no-verify"], wt.path)
