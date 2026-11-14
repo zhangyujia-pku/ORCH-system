@@ -24,8 +24,8 @@ from contextlib import nullcontext
 from .contract import Report, Task, validate_document
 from .planner import Provider
 from .trace import Tracer
-from .verifier import Check, collect_file_context, verify_task
-from .worker import run_worker
+from .verifier import Check, Verdict, collect_file_context, verify_task
+from .worker import out_of_scope as worker_out_of_scope, run_worker
 from .verification import is_protected, load_policy, protected_declarations, verify_integration
 from .worktree import GitError, MergeResult, WorktreeManager
 from . import handoff as handoff_mod
@@ -33,24 +33,6 @@ from . import kinds as kinds_mod
 from .heartbeat import Heartbeat
 from .control import ControlledProvider, RunControl, RunLock, RunStopped, load_execution
 from .recovery import Recovery, find_answer, manifest_digest
-
-
-def _file_state(root: Path, files: list[str]) -> dict[str, str]:
-    """产物文件的内容指纹。
-
-    验收命令本身是"被判者"，它不许改产物——改了就等于自己给自己出题。
-    这一层比 assert_snapshot 更细：后者看提交点，前者看具体文件内容。
-    """
-    import hashlib
-
-    out: dict[str, str] = {}
-    for f in files or []:
-        p = Path(root) / f
-        try:
-            out[f] = hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else "<absent>"
-        except OSError:
-            out[f] = "<unreadable>"
-    return out
 
 
 def _diff_stat(diff: str) -> str:
@@ -82,6 +64,7 @@ class TaskOutcome:
     # 只存摘要（判据 + 是否通过 + 退出码 + 输出首行），完整 stdout 在 artifacts/*.verify.json。
     checks: list[dict] = field(default_factory=list)
     diff_stat: str = ""
+    verification_mutations: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -534,7 +517,37 @@ def _execute_plan(run_dir, worker_provider, verifier_provider, max_agents, timeo
         tracer.emit("run.final_verify_skipped", why="未配置 verification.json")
     if summary.ok and policy is not None:
         tracer.emit("run.final_verify_start", path=summary.merged_worktree, sha=layer_base)
-        verdict = verify_integration(policy, manager.integration_path, layer_base, timeout, control=control)
+        try:
+            before_final = manager.snapshot_path(manager.integration_path)
+        except GitError as e:
+            verdict = Verdict(False, [Check("整体验收期间仓库未被改动", "integrity", False,
+                                            f"验收前状态审计失败：{e}", status="mutation")])
+        else:
+            verdict = verify_integration(policy, manager.integration_path, layer_base, timeout, control=control)
+            try:
+                after_final = manager.snapshot_path(manager.integration_path)
+                final_mutations = after_final.changes_since(before_final)
+                final_audit_error = ""
+            except GitError as e:
+                final_mutations = []
+                final_audit_error = str(e)
+            final_files = [p for p in final_mutations if not p.startswith("<")]
+            if final_mutations or final_audit_error:
+                # assert_snapshot 只看已跟踪内容；整体验收新建的越界文件也要拦住。
+                verdict.ok = False
+                detail: list[str] = []
+                if "<HEAD>" in final_mutations:
+                    detail.append("HEAD 被改变")
+                if "<index>" in final_mutations:
+                    detail.append("暂存区被改变")
+                if final_files:
+                    detail.append("文件：" + ", ".join(final_files))
+                if final_audit_error:
+                    detail.append(f"状态审计失败：{final_audit_error}")
+                verdict.checks.append(Check("整体验收期间仓库未被改动", "integrity", False,
+                                            "；".join(detail), status="mutation"))
+                tracer.emit("run.final_verify_mutation", files=final_files,
+                            head="<HEAD>" in final_mutations, index="<index>" in final_mutations)
         summary.final_verified = verdict.ok
         summary.final_checks = verdict.checks
         summary.ok = verdict.ok
@@ -700,25 +713,55 @@ def _run_one(
     # 提交之后工作区是干净的，这些判据一律输出空，表现为"worker 改对了、验收 0/3 通过"。
     # 真跑 README.md 那次就是这么假失败的。验收过了再重新提交一次（只加 worker 改过的文件，
     # 免得把验收命令产生的缓存一并带进去）。
-    before_state = _file_state(wt.path, res.changed)
     if commit.created:
         try:
             manager.uncommit(wt, wt.base)
         except GitError as e:
             tracer.emit("task.uncommit_failed", task_id=task.id, reason=str(e))
+            return TaskOutcome(
+                task_id=task.id, status="failed", provider=prov_name, changed=res.changed,
+                elapsed_s=time.time() - t0, note=f"退回提交失败，已停止验收：{e}",
+                base_sha=wt.base,
+            )
+
+    try:
+        before_tree = manager.snapshot(wt)
+    except GitError as e:
+        tracer.emit("task.audit_failed", task_id=task.id, attempt=attempt, reason=str(e))
+        return TaskOutcome(
+            task_id=task.id, status="failed", provider=prov_name, changed=res.changed,
+            elapsed_s=time.time() - t0, note=f"验收前状态审计失败：{e}", base_sha=wt.base,
+        )
 
     verdict = verify_task(
         task, wt, diff, verifier_provider, timeout=timeout,
         files_context=collect_file_context(wt.path, res.changed), control=control,
     )
-    after_state = _file_state(wt.path, res.changed)
-    if after_state != before_state:
-        # 验收命令把产物改了：不能凭"它自己改完再判自己"过。
+    try:
+        after_tree = manager.snapshot(wt)
+        mutations = after_tree.changes_since(before_tree)
+        audit_error = ""
+    except GitError as e:
+        mutations = []
+        audit_error = str(e)
+    actual_mutations = [p for p in mutations if not p.startswith("<")]
+    if mutations or audit_error:
+        # 验收命令只能读：任何新增、删除、修改（HEAD/暂存区也算）都拒绝接纳。
         verdict.ok = False
-        changed_now = sorted(k for k in after_state if before_state.get(k) != after_state.get(k))
-        verdict.checks.append(Check("验收期间产物未被改动", "integrity", False,
-                                    f"这些文件在验收过程中变了：{', '.join(changed_now) or '（新增/删除）'}",
-                                    status="mutation"))
+        detail: list[str] = []
+        if "<HEAD>" in mutations:
+            detail.append("HEAD 被改变")
+        if "<index>" in mutations:
+            detail.append("暂存区被改变")
+        if actual_mutations:
+            detail.append("文件：" + ", ".join(actual_mutations))
+        if audit_error:
+            detail.append(f"状态审计失败：{audit_error}")
+        verdict.checks.append(Check("验收期间仓库未被改动", "integrity", False,
+                                    "；".join(detail), status="mutation"))
+        tracer.emit("task.verification_mutation", task_id=task.id, attempt=attempt,
+                    files=actual_mutations, head="<HEAD>" in mutations,
+                    index="<index>" in mutations)
     (artifacts / f"{task.id}-a{attempt}.verify.json").write_text(
         __import__("json").dumps(
             [asdict(c) for c in verdict.checks],
@@ -753,9 +796,12 @@ def _run_one(
         branch=wt.branch if verdict.ok else "",
         provider=prov_name,
         changed=res.changed,
+        out_of_scope=worker_out_of_scope(actual_mutations, task.writes, task.forbidden),
         failures=[c.criterion for c in verdict.failures],
         elapsed_s=time.time() - t0,
-        note="" if verdict.ok else "验收未通过",
+        note="" if verdict.ok else (
+            "验收期间仓库被改动，已拒绝接纳" if (mutations or audit_error) else "验收未通过"
+        ),
         base_sha=wt.base,
         head_sha=head_sha,
         retryable=not verdict.ok and all(c.status in {"passed", "failed"} for c in verdict.checks),
@@ -767,4 +813,5 @@ def _run_one(
             "out": " ".join((c.stdout or c.stderr or "").split())[:160],
         } for c in verdict.checks],
         diff_stat=_diff_stat(diff),
+        verification_mutations=actual_mutations,
     )
