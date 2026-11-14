@@ -937,7 +937,11 @@ def _auto_apply(run_dir: Path, summary) -> str:
     if res.errors:
         return f"自动合并未执行：{res.errors[0]}（产物在集成分支，处理后可 `orch apply`）"
     if res.merged:
-        return f"已自动合并到当前分支（{len(res.files)} 个文件）。要撤回：`orch undo {res.run_id}`。"
+        return (f"已自动合并到当前分支（{len(res.files)} 个文件）。"
+                f"注意：`orch undo {res.run_id}` 只清理本次运行的分支与工作树，"
+                f"不会撤回已合并的内容；如需人工撤回，请先核对合并提交"
+                f"（`git log --oneline --merges --grep \"orch: apply {res.run_id}\"`），"
+                f"再决定是否 revert。")
     return "自动合并未产生变化（当前分支已包含这些改动）。"
 
 

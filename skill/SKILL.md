@@ -280,7 +280,10 @@ orch eta --tasks 12
 | 合并冲突，已回滚 | 产物和用户当前分支冲突 | 已自动回滚、仓库没被弄脏；产物在集成分支，需要人工看 |
 | 自动合并已关闭 | 加了 `--no-apply` 或设了 `ORCH_AUTO_APPLY=off` | 需要时 `orch apply <run_id>` |
 
-撤回用 `orch undo <run_id>`：保留证据，只删分支与工作树。
+`orch undo <run_id>` 只做清理：保留证据，删本次运行的分支与工作树，
+**不会撤回已合并到当前分支的内容**。确实要撤回已合并内容时，先核对合并提交
+（`git log --oneline --merges --grep "orch: apply <run_id>"`），再由人决定是否 revert；
+不要承诺 undo 会替用户撤回。
 **任何情况下都不要手动拷贝文件**——手抄没有冲突检测、不留记录，事后没人知道谁改的。
 
 运行记录默认落在 `<仓库>/.orch-runs/`，已自动写进 `.git/info/exclude`，
@@ -322,7 +325,9 @@ orch undo <run_id> --runs-dir <runs目录>
 ```
 
 删该次运行的分支与工作树，**保留 `runs/<id>/` 下的证据**（trace、diff、验收记录）。
-不动用户工作区，也不动主干。
+它只清理 orch 自己留下的分支与工作树，**不会撤回已经合并到当前分支的内容**。
+如果这次运行已经 apply/自动合并，人工撤回要先核对合并提交
+（`git log --oneline --merges --grep "orch: apply <run_id>"`），再决定是否 revert。
 
 ## 不要做的事
 
