@@ -94,7 +94,8 @@ python -m pytest tests -q        # 本快照实测 402 passed, 1 skipped
 【orch 执行成功】…
   DONE  t01   27.1s  1 文件 · +1 −1
         验收 1/1 通过
-工作区：已自动合并到当前分支（1 个文件）。要撤回：orch undo <run_id>
+工作区：已自动合并到当前分支（1 个文件）。撤回提示：orch undo <run_id> 只清理分支与工作树，不会撤回已合并内容；
+人工撤回请先核对合并提交（git log --oneline --merges --grep "orch: apply <run_id>"），再决定是否 revert
 ## 成本核算
   A 对照（实测）   60,938 token · $0.0178
   本次 D           18,014 token（H 估计）+ 211,798 token（执行） · $0.0145
