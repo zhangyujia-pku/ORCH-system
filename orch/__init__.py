@@ -29,4 +29,4 @@ __all__ = [
     "validate_file",
     "writes_overlap",
 ]
-__version__ = "0.1.0"
+__version__ = "1.9.8"
